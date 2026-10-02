@@ -6,9 +6,9 @@
 <meta name="theme-color" content="#0a0918">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="description" content="塔罗牌在线占卜 —— 心中默念你的问题，抽一张属于你的牌。">
+<meta name="description" content="塔罗牌在线占卜 —— 写下你的问题，抽一张牌，得到针对这个问题的解读。">
 <meta property="og:title" content="塔罗占卜 · 抽一张牌">
-<meta property="og:description" content="心中默念你的问题，抽一张属于你的牌。">
+<meta property="og:description" content="写下你的问题，抽一张牌，得到针对这个问题的解读。">
 <meta property="og:type" content="website">
 <title>塔罗占卜 · 抽一张牌</title>
 <style>
@@ -33,9 +33,7 @@ body{
     linear-gradient(180deg, var(--bg-1) 0%, var(--bg-0) 100%);
   background-attachment:fixed;
   min-height:100dvh;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
+  display:flex;flex-direction:column;align-items:center;
   padding:calc(env(safe-area-inset-top,0px) + 20px) 16px calc(env(safe-area-inset-bottom,0px) + 24px);
   overflow-x:hidden;
   -webkit-text-size-adjust:100%;
@@ -43,64 +41,70 @@ body{
 
 /* ---------- 星空 ---------- */
 #sky{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
-#sky i{
-  position:absolute;background:#fff;border-radius:50%;opacity:.75;
-  animation:twinkle var(--d,3s) ease-in-out infinite;
-}
+#sky i{position:absolute;background:#fff;border-radius:50%;opacity:.75;animation:twinkle var(--d,3s) ease-in-out infinite}
 @keyframes twinkle{0%,100%{opacity:.15;transform:scale(.8)}50%{opacity:.9;transform:scale(1.15)}}
 
-main{position:relative;z-index:1;width:100%;max-width:430px;display:flex;flex-direction:column;align-items:center;gap:18px}
+main{position:relative;z-index:1;width:100%;max-width:450px;display:flex;flex-direction:column;align-items:center;gap:16px}
 
 /* ---------- 标题 ---------- */
 header{text-align:center;display:flex;flex-direction:column;gap:6px;margin-top:4px}
 h1{
-  margin:0;
-  font-size:clamp(22px,6.4vw,28px);
-  font-weight:600;
-  letter-spacing:.16em;
+  margin:0;font-size:clamp(22px,6.4vw,28px);font-weight:600;letter-spacing:.16em;
   background:linear-gradient(180deg,var(--gold-2),var(--gold));
-  -webkit-background-clip:text;background-clip:text;
-  -webkit-text-fill-color:transparent;color:var(--gold);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:var(--gold);
 }
 header p{margin:0;color:var(--muted);font-size:13.5px;letter-spacing:.04em}
 
 /* ---------- 提问 ---------- */
 .ask{width:100%;display:flex;flex-direction:column;gap:10px}
 input[type=text]{
-  width:100%;
-  font-size:16px;              /* >=16px 防止 iOS 聚焦时自动放大 */
-  font-family:inherit;
-  color:var(--ink);
-  padding:14px 16px;
-  border-radius:14px;
+  width:100%;font-size:16px;font-family:inherit;color:var(--ink);
+  padding:14px 16px;border-radius:14px;
   border:1px solid rgba(217,184,119,.28);
-  background:rgba(255,255,255,.05);
-  outline:none;
+  background:rgba(255,255,255,.05);outline:none;
   transition:border-color .2s, background .2s;
 }
 input[type=text]::placeholder{color:#7d76a3}
 input[type=text]:focus{border-color:rgba(217,184,119,.65);background:rgba(255,255,255,.08)}
 
-button{
+/* ---------- 话题选择 ---------- */
+.topics-box{display:flex;flex-direction:column;gap:8px}
+.topics-label{font-size:12px;color:var(--muted);letter-spacing:.06em;text-align:center}
+.topics{display:flex;flex-wrap:wrap;gap:7px;justify-content:center}
+.chip{
+  font-family:inherit;font-size:13px;line-height:1;
+  padding:0 13px;min-height:36px;
+  display:inline-flex;align-items:center;gap:4px;
+  border-radius:999px;cursor:pointer;
+  border:1px solid rgba(217,184,119,.28);
+  background:rgba(255,255,255,.04);color:var(--muted);
+  transition:border-color .18s, background .18s, color .18s;
+}
+.chip.on{
+  border-color:rgba(217,184,119,.85);
+  background:rgba(217,184,119,.16);
+  color:var(--gold-2);font-weight:600;
+}
+.chip:active{transform:scale(.96)}
+
+/* ---------- 按钮 ---------- */
+.btn{
+  width:100%;min-height:52px;padding:14px 18px;
   font-family:inherit;font-size:16px;font-weight:600;letter-spacing:.1em;
-  color:#241a08;
-  border:none;border-radius:14px;
-  min-height:52px;             /* 触摸友好 */
-  padding:14px 18px;
-  cursor:pointer;
+  color:#241a08;border:none;border-radius:14px;cursor:pointer;
   background:linear-gradient(180deg,var(--gold-2),var(--gold));
   box-shadow:0 6px 22px rgba(217,184,119,.28), inset 0 1px 0 rgba(255,255,255,.55);
   transition:transform .12s ease, box-shadow .2s, opacity .2s;
 }
-button:active{transform:translateY(2px) scale(.99);box-shadow:0 3px 12px rgba(217,184,119,.22)}
-button:disabled{opacity:.45;box-shadow:none}
+.btn:active{transform:translateY(2px) scale(.99);box-shadow:0 3px 12px rgba(217,184,119,.22)}
+.btn:disabled{opacity:.45;box-shadow:none}
+.again{background:transparent;color:var(--gold-2);border:1px solid rgba(217,184,119,.5);box-shadow:none;font-weight:500}
+.again:active{transform:translateY(2px)}
 
 /* ---------- 牌 ---------- */
-.stage{perspective:1400px;perspective-origin:50% 40%;padding:6px 0 2px}
+.stage{perspective:1400px;perspective-origin:50% 40%;padding:4px 0 2px}
 .card{
-  position:relative;
-  width:min(58vw,196px);
-  aspect-ratio:2/3;
+  position:relative;width:min(55vw,190px);aspect-ratio:2/3;
   transform-style:preserve-3d;
   transition:transform .9s cubic-bezier(.22,.85,.28,1);
   will-change:transform;
@@ -115,15 +119,11 @@ button:disabled{opacity:.45;box-shadow:none}
   100%{transform:rotate(0) translateY(0)}
 }
 .face{
-  position:absolute;inset:0;
-  border-radius:var(--radius);
+  position:absolute;inset:0;border-radius:var(--radius);
   backface-visibility:hidden;-webkit-backface-visibility:hidden;
-  display:flex;align-items:center;justify-content:center;
-  overflow:hidden;
+  display:flex;align-items:center;justify-content:center;overflow:hidden;
   box-shadow:0 14px 34px rgba(0,0,0,.55), 0 0 0 1px rgba(217,184,119,.45) inset;
 }
-
-/* 牌背 */
 .back{
   background:
     repeating-linear-gradient(45deg, rgba(217,184,119,.10) 0 6px, transparent 6px 12px),
@@ -132,57 +132,33 @@ button:disabled{opacity:.45;box-shadow:none}
   border:1.5px solid rgba(217,184,119,.5);
 }
 .back-inner{
-  width:74%;height:82%;
-  border:1px solid rgba(217,184,119,.42);
-  border-radius:12px;
-  display:flex;align-items:center;justify-content:center;
-  font-size:34px;
-  color:var(--gold);
+  width:74%;height:82%;border:1px solid rgba(217,184,119,.42);border-radius:12px;
+  display:flex;align-items:center;justify-content:center;font-size:34px;color:var(--gold);
   background:radial-gradient(60% 50% at 50% 50%, rgba(217,184,119,.14), transparent 70%);
   animation:breathe 3.6s ease-in-out infinite;
 }
 @keyframes breathe{0%,100%{opacity:.72;transform:scale(1)}50%{opacity:1;transform:scale(1.05)}}
-
-/* 牌面 */
 .front{
-  transform:rotateY(180deg);
+  transform:rotateY(180deg);padding:12px;
   border:1.5px solid rgba(217,184,119,.72);
-  background:
-    radial-gradient(85% 65% at 50% 22%, #3a2c72 0%, #1b1440 55%, #120e2c 100%);
-  padding:12px;
+  background:radial-gradient(85% 65% at 50% 22%, #3a2c72 0%, #1b1440 55%, #120e2c 100%);
 }
 .front-inner{
-  width:100%;height:100%;
-  border:1px solid rgba(217,184,119,.35);
-  border-radius:10px;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:6px;
-  padding:10px 6px;
-  text-align:center;
-  transition:transform .5s ease;
+  width:100%;height:100%;border:1px solid rgba(217,184,119,.35);border-radius:10px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+  padding:10px 6px;text-align:center;transition:transform .5s ease;
 }
-.front-inner.rev{transform:rotate(180deg)}   /* 逆位：牌面倒过来 */
-.f-num{
-  position:absolute;top:16px;left:18px;
-  font-size:11px;letter-spacing:.14em;color:var(--gold);opacity:.85;
-  font-variant-numeric:tabular-nums;
-}
+.front-inner.rev{transform:rotate(180deg)}
+.f-num{position:absolute;top:16px;left:18px;font-size:11px;letter-spacing:.14em;color:var(--gold);opacity:.85;font-variant-numeric:tabular-nums}
 .f-num.br{top:auto;left:auto;bottom:16px;right:18px;transform:rotate(180deg)}
 .f-sym{font-size:clamp(34px,11vw,44px);line-height:1;filter:drop-shadow(0 0 14px rgba(217,184,119,.5))}
-.f-name{
-  font-family:"Songti SC","STSong","Noto Serif SC",serif;
-  font-size:clamp(17px,5.4vw,21px);font-weight:600;letter-spacing:.14em;color:var(--gold-2);
-}
+.f-name{font-family:"Songti SC","STSong","Noto Serif SC",serif;font-size:clamp(17px,5.4vw,21px);font-weight:600;letter-spacing:.14em;color:var(--gold-2)}
 .f-en{font-size:10px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase}
 
 /* ---------- 结果 ---------- */
 .result{
-  width:100%;
-  display:none;
-  flex-direction:column;
-  gap:10px;
-  padding:18px 18px 16px;
-  border-radius:var(--radius);
+  width:100%;display:none;flex-direction:column;gap:12px;
+  padding:18px;border-radius:var(--radius);
   border:1px solid rgba(217,184,119,.22);
   background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
   backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
@@ -190,40 +166,28 @@ button:disabled{opacity:.45;box-shadow:none}
 }
 .result.show{display:flex}
 @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.r-q{margin:0;font-size:12.5px;color:var(--muted);padding-left:10px;border-left:2px solid rgba(217,184,119,.4);line-height:1.6;word-break:break-word}
 .r-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .badge{
-  font-size:11.5px;letter-spacing:.12em;
-  padding:4px 10px;border-radius:999px;
-  border:1px solid rgba(217,184,119,.5);
-  color:var(--gold-2);background:rgba(217,184,119,.12);
-  white-space:nowrap;
+  font-size:11.5px;letter-spacing:.12em;padding:4px 10px;border-radius:999px;white-space:nowrap;
+  border:1px solid rgba(217,184,119,.5);color:var(--gold-2);background:rgba(217,184,119,.12);
 }
 .badge.rev{border-color:rgba(180,140,255,.55);color:#d9c8ff;background:rgba(150,110,255,.14)}
-.r-name{margin:0;font-size:18px;font-weight:600;letter-spacing:.06em;color:var(--gold-2)}
-.r-kw{margin:0;font-size:13px;color:var(--gold);letter-spacing:.06em}
-.r-text{margin:0;font-size:15px;line-height:1.75;color:#ddd8f2}
-.r-q{
-  margin:0;font-size:12.5px;color:var(--muted);
-  padding-left:10px;border-left:2px solid rgba(217,184,119,.4);
-  line-height:1.6;word-break:break-word;
-}
-.again{margin-top:4px;background:transparent;color:var(--gold-2);border:1px solid rgba(217,184,119,.5);box-shadow:none;font-weight:500}
-.again:active{transform:translateY(2px)}
+.r-name{margin:0;font-size:17px;font-weight:600;letter-spacing:.05em;color:var(--gold-2)}
+.r-kw{margin:0;font-size:12.5px;color:var(--gold);letter-spacing:.06em}
+.r-cardtext{margin:0;font-size:13px;line-height:1.7;color:var(--muted)}
+.divider{height:1px;background:linear-gradient(90deg,transparent,rgba(217,184,119,.35),transparent);margin:2px 0}
+.a-label{margin:0;font-size:12.5px;color:var(--gold);letter-spacing:.08em}
+.a-text{margin:0;font-size:16.5px;line-height:1.8;color:#f3efff;font-weight:500}
+.a-meta{margin:0;font-size:11.5px;color:#6f6894;letter-spacing:.04em}
 
-footer{
-  position:relative;z-index:1;
-  margin-top:auto;padding-top:22px;
-  font-size:11.5px;color:#5f5885;letter-spacing:.06em;text-align:center;
-}
+footer{position:relative;z-index:1;margin-top:auto;padding-top:22px;font-size:11.5px;color:#5f5885;letter-spacing:.06em;text-align:center}
 
 @media (prefers-reduced-motion:reduce){
   *{animation:none!important;transition-duration:.01ms!important}
   .card{transition:transform .01ms}
 }
-/* 横屏/大屏微调 */
-@media (min-height:760px) and (min-width:390px){
-  .card{width:min(56vw,214px)}
-}
+@media (min-height:800px) and (min-width:390px){.card{width:min(52vw,204px)}}
 </style>
 </head>
 <body>
@@ -232,13 +196,19 @@ footer{
 <main>
   <header>
     <h1>塔 罗 占 卜</h1>
-    <p>心中默念你的问题，然后抽一张牌</p>
+    <p>写下你的问题，抽一张牌</p>
   </header>
 
   <div class="ask">
     <input id="q" type="text" inputmode="text" autocomplete="off"
-           placeholder="写下你的问题…（也可以留空）" aria-label="你的问题">
-    <button id="draw">抽 一 张 牌</button>
+           placeholder="例如：我这次考试能过吗？" aria-label="你的问题">
+
+    <div class="topics-box">
+      <span class="topics-label" id="topicsLabel">这个问题属于…（自动识别，可手动改）</span>
+      <div class="topics" id="topics" role="group" aria-label="问题话题"></div>
+    </div>
+
+    <button class="btn" id="draw">抽 一 张 牌</button>
   </div>
 
   <div class="stage">
@@ -258,92 +228,386 @@ footer{
 
   <section class="result" id="result" aria-live="polite">
     <p class="r-q" id="rQ"></p>
-    <div class="r-head">
-      <span class="badge" id="rOrient">正位</span>
-      <h2 class="r-name" id="rName">愚者</h2>
+
+    <div>
+      <div class="r-head">
+        <span class="badge" id="rOrient">正位</span>
+        <h2 class="r-name" id="rName">愚者 · The Fool</h2>
+      </div>
+      <p class="r-kw" id="rKw"></p>
     </div>
-    <p class="r-kw" id="rKw"></p>
-    <p class="r-text" id="rText"></p>
-    <button class="again" id="again">再抽一张</button>
+    <p class="r-cardtext" id="rCardText"></p>
+
+    <div class="divider"></div>
+
+    <p class="a-label" id="aLabel">🎯 针对你的问题</p>
+    <p class="a-text" id="aText"></p>
+    <p class="a-meta" id="aMeta"></p>
+
+    <button class="btn again" id="again">再抽一张</button>
   </section>
 
   <footer>仅供娱乐 · 命运始终在你手里</footer>
 </main>
 
 <script>
-/* ============ 大阿卡纳 22 张 ============ */
+/* =========================================================
+   1. 大阿卡纳 22 张 —— 只提供「牌面气质」和通用牌意
+   ========================================================= */
 var DECK = [
   {n:0, name:'愚者', en:'The Fool', sym:'🃏', kw:'新的开始',
-   up:'放下顾虑，大胆迈出第一步——这件事值得一试，哪怕你觉得自己还没准备好。',
-   rev:'你可能把它想得太简单了。先别急着冲，把风险想清楚再行动。'},
+   up:'带着好奇心出发，不必等万事俱备。', rev:'冲得太快容易踩空，先看清脚下。'},
   {n:1, name:'魔术师', en:'The Magician', sym:'🎩', kw:'能力具足',
-   up:'你其实已经具备做成这件事的条件，缺的只是动手。现在正是时候。',
-   rev:'想法很多但没落地，或者有人在夸大其词。先看行动，别信承诺。'},
+   up:'你手上的工具已经够了，缺的只是动手。', rev:'说得多做得少，或者有人在夸大其词。'},
   {n:2, name:'女祭司', en:'The High Priestess', sym:'🌙', kw:'倾听直觉',
-   up:'答案你心里其实已经有了，静下来听自己的声音。现在适合观察，而不是行动。',
-   rev:'你可能在回避某个不想面对的真相，或者有人对你隐瞒了信息。'},
+   up:'先安静观察，答案会自己浮现。', rev:'有件事你不想面对，或者信息被人藏着。'},
   {n:3, name:'女皇', en:'The Empress', sym:'🌷', kw:'丰盛滋养',
-   up:'会有一个好结果，而且是被滋养、被照顾的那种好。放心去做。',
-   rev:'投入太多反而失衡——不论是感情还是精力，先照顾好自己。'},
+   up:'被照顾、被滋养的走向。', rev:'投入过头失了平衡，先照顾自己。'},
   {n:4, name:'皇帝', en:'The Emperor', sym:'🏛️', kw:'掌控秩序',
-   up:'靠秩序和计划取胜。把规则、时间、资源理清楚，你会赢。',
-   rev:'太想控制反而卡住。试试换个方法，或者听听别人的意见。'},
+   up:'靠规则和计划推进，稳扎稳打。', rev:'抓得太紧反而卡住，试试松手。'},
   {n:5, name:'教皇', en:'The Hierophant', sym:'📜', kw:'寻求指引',
-   up:'去寻找有经验的人，或者遵循成熟的惯例，别自己硬闯。',
-   rev:'旧规矩不一定适合你。可以质疑、可以打破，但要承担后果。'},
+   up:'去找有经验的人，或遵循成熟的做法。', rev:'旧规矩不一定适合你，可以质疑。'},
   {n:6, name:'恋人', en:'The Lovers', sym:'💞', kw:'选择与共鸣',
-   up:'会有一段和谐的关系或一次心甘情愿的选择——听从本心。',
-   rev:'价值观不一致，或者你在两难之间摇摆。别为了讨好别人做决定。'},
+   up:'和谐的关系，心甘情愿的选择。', rev:'价值观不一致，或夹在两难之间。'},
   {n:7, name:'战车', en:'The Chariot', sym:'🏇', kw:'意志突破',
-   up:'只要方向明确、全力以赴，就能突破。速战速决。',
-   rev:'方向不明就猛冲会翻车，或有两股力量在互相拉扯。先稳住。'},
+   up:'方向明确就全力冲，速战速决。', rev:'方向不明猛冲会翻车，先稳住。'},
   {n:8, name:'力量', en:'Strength', sym:'🦁', kw:'以柔克刚',
-   up:'不需要硬碰硬，用耐心和温柔就能驯服局面。你撑得住。',
-   rev:'信心不足，或被情绪牵着走。先恢复体力与心力。'},
+   up:'用耐心驯服局面，不必硬碰硬。', rev:'信心不足，被情绪牵着走。'},
   {n:9, name:'隐士', en:'The Hermit', sym:'🕯️', kw:'独处内省',
-   up:'答案不在外面。给自己一点安静的时间，答案会自己浮现。',
-   rev:'独处太久变成了逃避。该出去见见人了。'},
+   up:'答案在里面不在外面，给自己安静。', rev:'独处太久变成逃避，该出门了。'},
   {n:10, name:'命运之轮', en:'Wheel of Fortune', sym:'🎡', kw:'转机将至',
-   up:'局势正在转动，而且是往好的方向。顺势而为。',
-   rev:'同样的问题反复出现，说明该改变做法，而不是继续等运气。'},
+   up:'局势正在转动，顺势而为。', rev:'同样的问题反复出现，该换做法了。'},
   {n:11, name:'正义', en:'Justice', sym:'⚖️', kw:'公平因果',
-   up:'因果清晰，你会得到与付出相称的结果。诚实为上。',
-   rev:'存在不公平或推卸责任。保留证据，别吃哑巴亏。'},
+   up:'你会得到与付出相称的结果。', rev:'存在不公平或推卸责任，留好凭据。'},
   {n:12, name:'倒吊人', en:'The Hanged Man', sym:'🙃', kw:'换个角度',
-   up:'现在不是推进的时候，停下来反而能看到新路。',
-   rev:'无谓的牺牲与拖延。该放下的就放下。'},
+   up:'现在不是推进的时候，停下反而有路。', rev:'无谓的牺牲和拖延，该放下了。'},
   {n:13, name:'死神', en:'Death', sym:'🦋', kw:'结束即开始',
-   up:'有件事必须画上句号，之后是新生。别抓着不放。',
-   rev:'你明知该结束了却还在硬撑，这会持续消耗你。'},
+   up:'有件事该画句号了，之后是新生。', rev:'明知该结束却还在硬撑。'},
   {n:14, name:'节制', en:'Temperance', sym:'🍶', kw:'平衡调和',
-   up:'不偏不倚、慢慢调和，会有恰到好处的结局。',
-   rev:'用力过猛或过于极端，把节奏调回来。'},
+   up:'不偏不倚，慢慢调和出好结果。', rev:'用力过猛或太极端，把节奏调回来。'},
   {n:15, name:'恶魔', en:'The Devil', sym:'😈', kw:'诱惑束缚',
-   up:'有短期甜头但代价不小，小心上瘾或被人拿捏。',
-   rev:'你正在挣脱某个束缚，坚持住，快出来了。'},
+   up:'短期甜头，代价不小，小心被拿捏。', rev:'你正在挣脱束缚，坚持住。'},
   {n:16, name:'高塔', en:'The Tower', sym:'⚡', kw:'突变冲击',
-   up:'会有一次突然的崩塌，但它清掉的本来就不稳的东西。',
-   rev:'危机在缓解，但根源问题还没解决。趁现在修地基。'},
+   up:'一次突然的崩塌，清掉本就不稳的东西。', rev:'危机在缓解，但根源还没修好。'},
   {n:17, name:'星星', en:'The Star', sym:'⭐', kw:'希望重燃',
-   up:'最坏的时候过去了，愿望有实现的可能。保持信念。',
-   rev:'期待落空或信心动摇。降低预期，重新校准愿望。'},
+   up:'最坏的时候过去了，愿望有实现的可能。', rev:'期待落空，重新校准愿望。'},
   {n:18, name:'月亮', en:'The Moon', sym:'🌕', kw:'迷雾未散',
-   up:'信息不全，真假难辨。现在不适合下判断。',
-   rev:'真相正在浮现，你快要看清楚了。再等等。'},
+   up:'信息不全，真假难辨，先别下判断。', rev:'真相正在浮现，快看清楚了。'},
   {n:19, name:'太阳', en:'The Sun', sym:'☀️', kw:'大吉光明',
-   up:'极好的一张牌——成功、快乐、光明正大。放心去要。',
-   rev:'结果还是好的，只是比你想的慢一点。'},
+   up:'极好的一张牌，成功、快乐、坦荡。', rev:'结果仍然好，只是比想的慢。'},
   {n:20, name:'审判', en:'Judgement', sym:'📯', kw:'觉醒召唤',
-   up:'是时候做个总结、接受结果，然后重新出发。',
-   rev:'你还没原谅自己，或者不敢面对评判。放下包袱。'},
+   up:'做个总结，接受结果，重新出发。', rev:'还没原谅自己，或不敢面对评判。'},
   {n:21, name:'世界', en:'The World', sym:'🌍', kw:'圆满达成',
-   up:'一个阶段完美收官，你想要的会完整地实现。',
-   rev:'很接近了，但还差收尾。别在最后关头松劲。'}
+   up:'一个阶段完美收官，完整实现。', rev:'很接近了，别在收尾时松劲。'}
 ];
 
-var REVERSED_RATE = 0.35;   /* 逆位概率 */
+var REVERSED_RATE = 0.35;
 
-/* ============ 星空 ============ */
+/* =========================================================
+   2. 话题答案库 —— 每个话题有独立的「正位库」和「逆位库」
+      答案直接针对该话题，保证永远和问题对得上
+   ========================================================= */
+var TOPICS = {
+
+  love: {
+    label:'感情', icon:'💗',
+    keys:['喜欢','爱','暗恋','表白','告白','追求','心动','男朋友','女朋友','男友','女友','对象','恋爱','分手','复合','挽回','暧昧','结婚','婚姻','相亲','感情','前任','异地','脱单','单身','缘分','在一起','忽冷忽热','冷淡','约会','婚'],
+    up:[
+      '有戏。对方的注意力其实已经落在你身上了，只是还没找到开口的时机。',
+      '会成。你主动迈出那一步，关系就会顺势往前推。',
+      '这段感情有继续走下去的底子，别急着下结论。',
+      '你担心的那件事，大概率不会发生，可以放心。',
+      '对方对你有好感，只是表达比较含蓄，别用「他不够热情」来误判。',
+      '复合是有机会的，但前提是先把当初分开的原因摊开说清楚。',
+      '关系会往更稳定的方向走，你们正处在磨合之后的升温期。',
+      '你是被喜欢的那一方，可以稍微放松一点。',
+      '有新的缘分在靠近，可能来自你原本不太留意的圈子。',
+      '现在适合表达心意，时机比你想象的好。',
+      '这段关系能给你安全感，值得投入。',
+      '会有一个明确的答案给你，不用再猜来猜去了。',
+      '你们之间的默契比表面看起来更深，别被一时的冷淡吓退。',
+      '对方的犹豫不是不喜欢，而是在权衡现实问题，给他一点时间。',
+      '你的直觉是对的，这段感情值得再试一次。',
+      '有转机。之前的误会会被解开。'
+    ],
+    rev:[
+      '现在不是推进的好时机，对方的心还没定下来。',
+      '你在这段关系里付出的比收到的多，这个失衡需要被看见。',
+      '有第三方因素或现实阻力（家人、距离、工作），不是你们不够喜欢。',
+      '对方的承诺要打个问号，先看行动再看话。',
+      '复合的难度偏大，勉强在一起容易重蹈覆辙。',
+      '你可能把「习惯」当成了「喜欢」，先分清楚。',
+      '这段关系里的问题不会自己消失，需要有人先开口。',
+      '对方态度模糊，是因为他也在两难，别替他做决定。',
+      '你太用力了。抓得越紧，对方越想退。',
+      '会有一次失望，但这不是终点，只是让你看清一些事。',
+      '别为了不孤单而将就，这次的答案是「再等等」。',
+      '你在回避一个已经很明显的事实。',
+      '感情上的消耗大于滋养，你需要为自己设一条底线。',
+      '短期内不会有明确答复，做好等待或放手的准备。',
+      '表白成功的概率不高，建议先把关系处得更自然。',
+      '旧的问题会再次浮现，不解决的话，换个人也会遇到。'
+    ]
+  },
+
+  career: {
+    label:'事业', icon:'💼',
+    keys:['工作','事业','职场','求职','面试','简历','offer','录用','升职','晋升','加薪','涨薪','跳槽','离职','辞职','老板','领导','同事','项目','创业','副业','试用期','转正','裁员','绩效','考核','公司','就业','打工','实习','岗位','职业'],
+    up:[
+      '会有好消息，你投出去的努力正在被看见。',
+      '这次机会能拿下，你的准备比你以为的充分。',
+      '适合主动争取，上面的人对你的印象不差。',
+      '工作会往更稳定的方向走，短期辛苦是值得的。',
+      '你的能力在这里是够用的，别被「我不配」劝退。',
+      '会有贵人出现，很可能是一个比你资深的人。',
+      '转型或换方向是可行的，你的可迁移能力比想象中强。',
+      '面试或考核会顺利，临场发挥是你的加分项。',
+      '加薪或晋升有希望，但需要你先提出来。',
+      '手上这个项目能做成，关键在前期把需求对齐。',
+      '你在团队里的位置会变重要，接住它。',
+      '适合开始一个副业或小尝试，成本可控。',
+      '之前的付出会在这个阶段回本。',
+      '会有人主动给你机会，认真对待。',
+      '你的方案思路是对的，坚持推下去。',
+      '这次变动对你有利，哪怕过程有点折腾。'
+    ],
+    rev:[
+      '现在的大环境不太支持冒进，先稳住手头的事。',
+      '有人在含糊其辞，重要的条件一定要落到白纸黑字。',
+      '你低估了这件事的难度，重新评估一下时间和精力。',
+      '这次竞争会比较激烈，提前准备备选方案。',
+      '你的努力可能没落在关键点上，先确认对方真正要什么。',
+      '团队里有沟通不畅或责任不清的问题，保护好自己。',
+      '跳槽的时机还差一点，先把手上的事收尾。',
+      '承诺的回报可能会打折，别只凭口头承诺做决定。',
+      '你在硬撑一个并不适合你的方向，允许自己调整。',
+      '会有一次挫折，但它暴露的是流程问题，不是你不行。',
+      '别把所有赌注压在一个机会上。',
+      '有人在推卸责任，把记录留好。',
+      '短期内进展会比较慢，耐心比冲劲更重要。',
+      '你的方案还需要再打磨，现在提交容易被退回。',
+      '这个环境的天花板可能比你预期低，值得往外看看。',
+      '会有一段疲惫期，先保证休息，别做重大决定。'
+    ]
+  },
+
+  study: {
+    label:'学业', icon:'📚',
+    keys:['学习','学业','考试','成绩','分数','考研','高考','中考','期末','期中','论文','毕业','答辩','申请','录取','保研','留学','四六级','雅思','托福','证书','考公','公务员','编制','作业','课程','专业','导师','竞赛','成绩单','刷题','复习','补考','挂科','升学','读研'],
+    up:[
+      '会考好。你的基础比你以为的扎实，正常发挥就行。',
+      '这次申请或考试有希望，关键是别在最后阶段松劲。',
+      '你选的方向是对的，学下去会有回报。',
+      '会遇到愿意帮你的老师或同学，主动去问。',
+      '短期突击是有效的，但要抓重点而不是全面铺开。',
+      '成绩会达到预期，甚至略微超出。',
+      '适合挑战一个更难的目标，你现在够得着。',
+      '之前卡住的地方会突然通，别放弃那道题。',
+      '录取或通过的概率偏高，把材料准备扎实。',
+      '你的努力是有效努力，不用怀疑方法。',
+      '会有一次让你信心大增的成绩。',
+      '论文或项目的方向可以定下来了，别再来回换。',
+      '复习节奏调整一下就能提分，重点是错题。',
+      '你担心的那门课，其实没那么难。',
+      '会拿到一个不错的机会（竞赛、交流、实习），接住它。',
+      '坚持下去，这次的结果会证明你的选择没错。'
+    ],
+    rev:[
+      '现在的学习效率不高，换一种方法比硬扛更有效。',
+      '你有点被「假努力」困住了，先停下来复盘。',
+      '这次考试有风险，重点章节还没真正吃透。',
+      '注意力被别的事分散了，先处理掉那个干扰源。',
+      '目标定得太高了，拆成小步更容易推进。',
+      '临场可能出状况，提前做模拟比多背一遍更有用。',
+      '别指望运气，这门课需要实打实的时间投入。',
+      '你选的这个方向可能并不适合你，值得重新想。',
+      '申请结果存在不确定性，同时准备备选路径。',
+      '拖延已经在影响结果了，今天就开始最小的一步。',
+      '会有一次不理想的成绩，但它指出的是薄弱环节。',
+      '你在跟别人比较，这正在消耗你。回到自己的节奏。',
+      '信息收集得不够，做决定前多问几个人。',
+      '短期内压力偏大，注意身体，别熬垮。',
+      '这个任务比你想的花时间，尽早开始。',
+      '结果可能延迟公布，别在等待里空耗。'
+    ]
+  },
+
+  money: {
+    label:'财运', icon:'💰',
+    keys:['钱','财','财运','收入','工资','薪','存款','存钱','攒钱','理财','投资','基金','股票','赚','亏','花销','花费','预算','借钱','还钱','贷款','买房','买车','消费','购物','报销','奖金','红包','负债','信用卡','省钱','价格','费用'],
+    up:[
+      '财运会好转，会有一笔之前没预期的收入。',
+      '现在适合稳健积累，不适合赌一把。',
+      '你之前的一笔投入会开始回本。',
+      '谈钱的时候可以直接一点，这次你占理。',
+      '会有人还你钱，或者给你应得的补偿。',
+      '这笔花销是值得的，它会在以后帮到你。',
+      '适合开始记账或存钱，效果比你想的明显。',
+      '你的报价可以再高一档，别低估自己的价值。',
+      '会有额外进账的机会，但需要你主动接。',
+      '财务状况在往好的方向走，保持现在的节奏。',
+      '借钱给别人这件事可以答应，但要把期限说清楚。',
+      '适合学一个能变现的技能，回报在中长期。',
+      '你担心的那笔钱，最后不会亏太多。',
+      '会有一笔小惊喜：退款、红包或者报销。',
+      '现在开始攒钱，三个月后能看到明显变化。',
+      '这次选择偏保守是对的，稳比快重要。'
+    ],
+    rev:[
+      '最近容易超支，先看一眼账再决定买不买。',
+      '有一笔支出会比预期高，记得留出余地。',
+      '别碰高风险的东西，这次的运气不在赌上。',
+      '有人在钱的事上不够透明，问清楚再合作。',
+      '借出去的钱短期收不回来，量力而行。',
+      '你的收入和付出不太匹配，值得重新谈。',
+      '会有一个看起来很划算的坑，多问一句「凭什么」。',
+      '冲动消费会后悔，先放购物车等一天。',
+      '这笔投资短期会亏，做好心理准备。',
+      '别为了面子花钱，这次的面子不值那个价。',
+      '财务状况需要主动整理，拖着只会更乱。',
+      '有人可能占你便宜，把账目记清楚。',
+      '现在不适合扩张或加杠杆，先守住本金。',
+      '会有一笔意外开销，应急金该留了。',
+      '报酬可能被压价，提前把标准说好。',
+      '你对自己时间的定价太低了。'
+    ]
+  },
+
+  social: {
+    label:'人际', icon:'🤝',
+    keys:['人际','朋友','友情','闺蜜','兄弟','同学','室友','家人','父母','妈妈','爸爸','家庭','亲戚','社交','关系','圈子','被孤立','排挤','误会','矛盾','吵架','冷战','和好','原谅','信任','团队','合作','人缘','同班','友谊'],
+    up:[
+      '这段关系会缓和，主动打个招呼就有转机。',
+      '有人其实站在你这边，只是没说出来。',
+      '适合把心里的话说出来，对方接得住。',
+      '会认识一个聊得来的人。',
+      '家人最终会理解你的选择，给他们一点时间。',
+      '这次的误会能解开，关键是有一个人先开口。',
+      '你在圈子里的口碑比你以为的好。',
+      '适合主动联系一个很久没见的朋友。',
+      '团队里会有人帮你说话。',
+      '这段友谊经得起时间，值得维护。',
+      '你的善意会被记住，只是回报来得慢。',
+      '会有一次让你觉得被真正理解的对话。',
+      '拒绝别人这件事，这次可以坦然一点。',
+      '你担心的那个矛盾，其实没那么严重。',
+      '会有人主动向你示好。',
+      '保持现在的真诚，你的关系网会越来越稳。'
+    ],
+    rev:[
+      '有人在背后说闲话，不用解释太多，时间会证明。',
+      '这段关系里存在不对等，留意自己的感受。',
+      '有人在利用你的好说话，学着设边界。',
+      '这次沟通容易产生误解，重要的事最好当面说。',
+      '你正在勉强自己迎合别人，这会很累。',
+      '家人那边还会有分歧，别指望一次谈成。',
+      '有个朋友的关系在变淡，顺其自然就好。',
+      '别把秘密告诉不够熟的人。',
+      '会听到让你不舒服的话，先别急着反击。',
+      '这段关系需要一次坦白，不然会一直别扭。',
+      '你在意的那个人，最近没把注意力放在你身上。',
+      '团队里可能有小团体，保持中立更安全。',
+      '你付出得太多，而对方已经习惯了。',
+      '这次聚会可能会让你失望，去不去都行。',
+      '有人在拿你们做比较，别接这个茬。',
+      '需要一次断舍离，有些关系该降温了。'
+    ]
+  },
+
+  health: {
+    label:'健康', icon:'🌿',
+    keys:['健康','身体','生病','感冒','发烧','疼','痛','失眠','睡眠','熬夜','累','疲劳','精力','体力','免疫','过敏','胃','头疼','头痛','眼睛','腰','颈椎','减肥','体重','运动','锻炼','作息','压力','焦虑','情绪','心理','医生','体检','医院','恢复','养生'],
+    up:[
+      '身体会好转，规律作息比什么都管用。',
+      '现在开始调整还来得及，效果会很快显现。',
+      '你的疲劳是休息不够，不是生病，睡够就好。',
+      '这次的检查结果会让人安心。',
+      '适合开始一项能坚持的运动，轻量的就行。',
+      '情绪状态在回升，给自己一点肯定。',
+      '会找到适合你的作息节奏。',
+      '你担心的那个症状大概率不严重，但还是去查一下更放心。',
+      '恢复力比你想象的好，别太焦虑。',
+      '饮食调整一下，精力会有明显变化。',
+      '适合早睡，这一条能解决你一半的问题。',
+      '压力源正在减弱，你会慢慢松下来。',
+      '会有人提醒你注意身体，听进去。',
+      '你的自律正在起效，继续保持。',
+      '放松这件事，你做得比你以为的好。',
+      '会有一段状态特别好的时期，抓住它做重要的事。'
+    ],
+    rev:[
+      '身体在给你信号了，别再硬扛。',
+      '熬夜的账迟早要还，这两周尽量早睡。',
+      '建议去做一次检查，别靠猜。',
+      '你的疲劳是累积的，需要真正的休息而不是硬撑。',
+      '情绪正在消耗你的身体，找人聊聊。',
+      '运动计划定得太狠了，容易放弃，先减半。',
+      '最近免疫力偏低，注意保暖和饮食。',
+      '有个小毛病拖得有点久了，去处理掉。',
+      '你在用刷手机和外卖填补疲惫，这解决不了问题。',
+      '压力已经影响到睡眠了，认真对待。',
+      '别靠咖啡因撑，那是在透支。',
+      '这次恢复会比预期慢，给自己更多耐心。',
+      '焦虑放大了你对身体的感受，先放松再看。',
+      '久坐的问题需要现在就改。',
+      '会有一段状态低落的时期，允许自己慢一点。',
+      '别人给你的健康建议，这次值得听。'
+    ]
+  },
+
+  general: {
+    label:'通用', icon:'✨',
+    keys:[],
+    up:[
+      '可以。这件事的阻力比你感觉的小。',
+      '会成，但需要你先迈出第一步。',
+      '时机是好的，别把犹豫当成谨慎。',
+      '你担心的最坏情况，大概率不会发生。',
+      '答案偏向肯定，你的直觉是对的。',
+      '会有贵人或者转机出现，留意身边的人。',
+      '现在适合行动，等待只会让成本变高。',
+      '你能做成这件事，准备已经足够了。',
+      '结果会比你预期的好一些。',
+      '值得一试。即使不完美，收获也是你的。',
+      '会有好消息传来，保持开放。',
+      '你已经在正确的路上，继续走就行。',
+      '可以答应，这次的机会对你有利。',
+      '放下过度思考，答案其实很简单。',
+      '会有一次意外的顺利。',
+      '你比自己以为的更有底气。',
+      '现在开始不算晚。',
+      '这件事的走向是向上的，耐心一点。',
+      '你需要的资源其实已经在你手上了。',
+      '大胆一点，退路没有你想的那么必要。'
+    ],
+    rev:[
+      '现在不是好时机，先缓一缓。',
+      '这件事还有你没看到的信息，别急着定。',
+      '结果可能不如预期，做好备选方案。',
+      '你在勉强一件事，停下来问问自己为什么。',
+      '会有阻力，但不是死路，换个方法再试。',
+      '别把希望全押在这一件事上。',
+      '有人在影响你的判断，听听自己怎么想。',
+      '现在下决定容易后悔，再等一周。',
+      '你忽略了某个明显的信号，回头看看。',
+      '这件事的代价比你想的大，重新算一遍。',
+      '短期内不会有明确答案，先接受这个状态。',
+      '你在重复一个已经试过的做法。',
+      '需要放下点什么，才走得动。',
+      '会有一点失望，但它不影响大局。',
+      '别急着答应，先看清条件。',
+      '你太在意别人的看法了。',
+      '这次靠运气不够，得靠准备。',
+      '有件事你一直没处理，它正在拖住你。',
+      '慢一点。快了容易出错。',
+      '答案偏向「不」，但不是永远不。'
+    ]
+  }
+};
+
+/* =========================================================
+   3. 星空
+   ========================================================= */
 (function buildSky(){
   var sky = document.getElementById('sky');
   var frag = document.createDocumentFragment();
@@ -361,32 +625,121 @@ var REVERSED_RATE = 0.35;   /* 逆位概率 */
   sky.appendChild(frag);
 })();
 
-/* ============ 元素 ============ */
+/* =========================================================
+   4. 元素
+   ========================================================= */
 var $ = function(id){ return document.getElementById(id); };
 var card = $('card'), frontInner = $('frontInner'), result = $('result');
 var btnDraw = $('draw'), btnAgain = $('again'), input = $('q');
+var topicsEl = $('topics'), topicsLabel = $('topicsLabel');
+var currentTopic = 'general';
+var manualTopic = false;
 var busy = false;
 
-/* ============ 抽牌 ============ */
+/* =========================================================
+   5. 问题 → 话题 识别（关键词计分，长词权重更高）
+   ========================================================= */
+var TOPIC_ORDER = ['love','career','study','money','social','health','general'];
+
+function detectTopic(q){
+  if (!q) return {topic:'general', hits:0};
+  var best = 'general', bestScore = 0, bestHits = 0;
+  for (var i = 0; i < TOPIC_ORDER.length; i++){
+    var key = TOPIC_ORDER[i];
+    if (key === 'general') continue;
+    var words = TOPICS[key].keys, score = 0, hits = 0;
+    for (var j = 0; j < words.length; j++){
+      if (q.indexOf(words[j]) >= 0){ score += words[j].length; hits++; }
+    }
+    if (score > bestScore){ bestScore = score; best = key; bestHits = hits; }
+  }
+  return {topic:best, hits:bestHits};
+}
+
+/* =========================================================
+   6. 话题按钮
+   ========================================================= */
+function buildChips(){
+  for (var i = 0; i < TOPIC_ORDER.length; i++){
+    (function(key){
+      var t = TOPICS[key];
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'chip';
+      b.setAttribute('data-topic', key);
+      b.innerHTML = t.icon + ' ' + t.label;
+      b.addEventListener('click', function(){
+        manualTopic = true;
+        setTopic(key, true);
+        if (navigator.vibrate){ try { navigator.vibrate(8); } catch(e){} }
+      });
+      topicsEl.appendChild(b);
+    })(TOPIC_ORDER[i]);
+  }
+}
+
+function setTopic(key, manual){
+  currentTopic = key;
+  var chips = topicsEl.querySelectorAll('.chip');
+  for (var i = 0; i < chips.length; i++){
+    if (chips[i].getAttribute('data-topic') === key) chips[i].classList.add('on');
+    else chips[i].classList.remove('on');
+  }
+  if (manual) topicsLabel.textContent = '已选择：' + TOPICS[key].label + '（点其他可切换）';
+}
+
+function onInput(){
+  if (manualTopic) return;
+  var q = input.value.trim();
+  var r = detectTopic(q);
+  if (r.hits > 0){
+    setTopic(r.topic, false);
+    topicsLabel.textContent = '识别到「' + TOPICS[r.topic].label + '」· 不对可手动改';
+  } else {
+    setTopic('general', false);
+    topicsLabel.textContent = q ? '没识别出话题，用「通用」· 也可手动选' : '这个问题属于…（自动识别，可手动改）';
+  }
+}
+
+input.addEventListener('input', onInput);
+input.addEventListener('keydown', function(e){
+  if (e.key === 'Enter'){ input.blur(); draw(); }
+});
+
+/* =========================================================
+   7. 抽牌
+   ========================================================= */
+function pick(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
+
 function draw(){
   if (busy) return;
   busy = true;
   btnDraw.disabled = true;
 
   var q = (input.value || '').trim();
+
+  if (!manualTopic){
+    var det = detectTopic(q);
+    setTopic(det.topic, false);
+    if (det.hits > 0) topicsLabel.textContent = '识别到「' + TOPICS[det.topic].label + '」· 不对可手动改';
+  }
+
+  var topic = TOPICS[currentTopic];
   var c = DECK[Math.floor(Math.random() * DECK.length)];
   var reversed = Math.random() < REVERSED_RATE;
 
-  /* 收起结果，回到牌背 */
+  /* 关键：答案从「本话题 + 本正逆位」的库里抽 */
+  var bank = reversed ? topic.rev : topic.up;
+  var answer = pick(bank);
+
   result.classList.remove('show');
   card.classList.remove('flipped');
   frontInner.classList.remove('rev');
   card.classList.add('shuffling');
 
-  if (navigator.vibrate) { try { navigator.vibrate(12); } catch (e) {} }
+  if (navigator.vibrate){ try { navigator.vibrate(12); } catch(e){} }
 
   setTimeout(function(){
-    /* 洗牌结束 → 写入牌面 */
     $('fNum').textContent  = c.n;
     $('fNum2').textContent = c.n;
     $('fSym').textContent  = c.sym;
@@ -397,14 +750,21 @@ function draw(){
     card.classList.remove('shuffling');
     card.classList.add('flipped');
 
-    /* 结果文字 */
-    $('rQ').textContent      = q ? '你的问题：' + q : '你没有写下问题，这张牌就当作给你的提示。';
-    $('rName').textContent   = c.name + ' · ' + c.en;
-    $('rKw').textContent     = '关键词：' + c.kw;
-    $('rText').textContent   = reversed ? c.rev : c.up;
+    /* ---- 结果 ---- */
+    $('rQ').textContent = q ? '你的问题：' + q : '你没有写下问题，这张牌就当作当下的提示。';
+
+    $('rName').textContent = c.name + ' · ' + c.en;
+    $('rKw').textContent   = '牌面关键词：' + c.kw;
+    $('rCardText').textContent = reversed ? c.rev : c.up;
+
     var badge = $('rOrient');
     badge.textContent = reversed ? '逆位' : '正位';
     badge.className = 'badge' + (reversed ? ' rev' : '');
+
+    $('aLabel').textContent = '🎯 针对你的问题 · ' + topic.icon + ' ' + topic.label;
+    $('aText').textContent  = answer;
+    $('aMeta').textContent  = '从「' + topic.label + ' · ' + (reversed ? '逆位' : '正位') +
+                              '」答案库的 ' + bank.length + ' 条中随机抽取';
 
     setTimeout(function(){
       result.classList.add('show');
@@ -416,9 +776,12 @@ function draw(){
 
 btnDraw.addEventListener('click', draw);
 btnAgain.addEventListener('click', draw);
-input.addEventListener('keydown', function(e){
-  if (e.key === 'Enter') { input.blur(); draw(); }
-});
+
+/* =========================================================
+   8. 启动
+   ========================================================= */
+buildChips();
+setTopic('general', false);
 </script>
 </body>
 </html>
