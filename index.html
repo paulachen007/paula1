@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a0918">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="description" content="塔罗牌在线占卜 —— 心中默念你的问题，抽一张属于你的牌。">
+<meta property="og:title" content="塔罗占卜 · 抽一张牌">
+<meta property="og:description" content="心中默念你的问题，抽一张属于你的牌。">
+<meta property="og:type" content="website">
+<title>塔罗占卜 · 抽一张牌</title>
+<style>
+:root{
+  --gold:#d9b877;
+  --gold-2:#f5e3b8;
+  --ink:#ece8fb;
+  --muted:#9d95c4;
+  --bg-0:#080714;
+  --bg-1:#171132;
+  --radius:18px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  color:var(--ink);
+  background:
+    radial-gradient(120% 80% at 50% -10%, #2c2159 0%, transparent 55%),
+    radial-gradient(100% 60% at 50% 110%, #241a4d 0%, transparent 60%),
+    linear-gradient(180deg, var(--bg-1) 0%, var(--bg-0) 100%);
+  background-attachment:fixed;
+  min-height:100dvh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:calc(env(safe-area-inset-top,0px) + 20px) 16px calc(env(safe-area-inset-bottom,0px) + 24px);
+  overflow-x:hidden;
+  -webkit-text-size-adjust:100%;
+}
+
+/* ---------- 星空 ---------- */
+#sky{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+#sky i{
+  position:absolute;background:#fff;border-radius:50%;opacity:.75;
+  animation:twinkle var(--d,3s) ease-in-out infinite;
+}
+@keyframes twinkle{0%,100%{opacity:.15;transform:scale(.8)}50%{opacity:.9;transform:scale(1.15)}}
+
+main{position:relative;z-index:1;width:100%;max-width:430px;display:flex;flex-direction:column;align-items:center;gap:18px}
+
+/* ---------- 标题 ---------- */
+header{text-align:center;display:flex;flex-direction:column;gap:6px;margin-top:4px}
+h1{
+  margin:0;
+  font-size:clamp(22px,6.4vw,28px);
+  font-weight:600;
+  letter-spacing:.16em;
+  background:linear-gradient(180deg,var(--gold-2),var(--gold));
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;color:var(--gold);
+}
+header p{margin:0;color:var(--muted);font-size:13.5px;letter-spacing:.04em}
+
+/* ---------- 提问 ---------- */
+.ask{width:100%;display:flex;flex-direction:column;gap:10px}
+input[type=text]{
+  width:100%;
+  font-size:16px;              /* >=16px 防止 iOS 聚焦时自动放大 */
+  font-family:inherit;
+  color:var(--ink);
+  padding:14px 16px;
+  border-radius:14px;
+  border:1px solid rgba(217,184,119,.28);
+  background:rgba(255,255,255,.05);
+  outline:none;
+  transition:border-color .2s, background .2s;
+}
+input[type=text]::placeholder{color:#7d76a3}
+input[type=text]:focus{border-color:rgba(217,184,119,.65);background:rgba(255,255,255,.08)}
+
+button{
+  font-family:inherit;font-size:16px;font-weight:600;letter-spacing:.1em;
+  color:#241a08;
+  border:none;border-radius:14px;
+  min-height:52px;             /* 触摸友好 */
+  padding:14px 18px;
+  cursor:pointer;
+  background:linear-gradient(180deg,var(--gold-2),var(--gold));
+  box-shadow:0 6px 22px rgba(217,184,119,.28), inset 0 1px 0 rgba(255,255,255,.55);
+  transition:transform .12s ease, box-shadow .2s, opacity .2s;
+}
+button:active{transform:translateY(2px) scale(.99);box-shadow:0 3px 12px rgba(217,184,119,.22)}
+button:disabled{opacity:.45;box-shadow:none}
+
+/* ---------- 牌 ---------- */
+.stage{perspective:1400px;perspective-origin:50% 40%;padding:6px 0 2px}
+.card{
+  position:relative;
+  width:min(58vw,196px);
+  aspect-ratio:2/3;
+  transform-style:preserve-3d;
+  transition:transform .9s cubic-bezier(.22,.85,.28,1);
+  will-change:transform;
+}
+.card.flipped{transform:rotateY(180deg)}
+.card.shuffling{animation:shuffle .62s ease-in-out}
+@keyframes shuffle{
+  0%{transform:rotate(0) translateY(0)}
+  20%{transform:rotate(-7deg) translateY(-10px)}
+  45%{transform:rotate(6deg) translateY(6px)}
+  70%{transform:rotate(-4deg) translateY(-4px)}
+  100%{transform:rotate(0) translateY(0)}
+}
+.face{
+  position:absolute;inset:0;
+  border-radius:var(--radius);
+  backface-visibility:hidden;-webkit-backface-visibility:hidden;
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;
+  box-shadow:0 14px 34px rgba(0,0,0,.55), 0 0 0 1px rgba(217,184,119,.45) inset;
+}
+
+/* 牌背 */
+.back{
+  background:
+    repeating-linear-gradient(45deg, rgba(217,184,119,.10) 0 6px, transparent 6px 12px),
+    repeating-linear-gradient(-45deg, rgba(217,184,119,.10) 0 6px, transparent 6px 12px),
+    radial-gradient(80% 60% at 50% 40%, #2b2160 0%, #140f2e 75%);
+  border:1.5px solid rgba(217,184,119,.5);
+}
+.back-inner{
+  width:74%;height:82%;
+  border:1px solid rgba(217,184,119,.42);
+  border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:34px;
+  color:var(--gold);
+  background:radial-gradient(60% 50% at 50% 50%, rgba(217,184,119,.14), transparent 70%);
+  animation:breathe 3.6s ease-in-out infinite;
+}
+@keyframes breathe{0%,100%{opacity:.72;transform:scale(1)}50%{opacity:1;transform:scale(1.05)}}
+
+/* 牌面 */
+.front{
+  transform:rotateY(180deg);
+  border:1.5px solid rgba(217,184,119,.72);
+  background:
+    radial-gradient(85% 65% at 50% 22%, #3a2c72 0%, #1b1440 55%, #120e2c 100%);
+  padding:12px;
+}
+.front-inner{
+  width:100%;height:100%;
+  border:1px solid rgba(217,184,119,.35);
+  border-radius:10px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:6px;
+  padding:10px 6px;
+  text-align:center;
+  transition:transform .5s ease;
+}
+.front-inner.rev{transform:rotate(180deg)}   /* 逆位：牌面倒过来 */
+.f-num{
+  position:absolute;top:16px;left:18px;
+  font-size:11px;letter-spacing:.14em;color:var(--gold);opacity:.85;
+  font-variant-numeric:tabular-nums;
+}
+.f-num.br{top:auto;left:auto;bottom:16px;right:18px;transform:rotate(180deg)}
+.f-sym{font-size:clamp(34px,11vw,44px);line-height:1;filter:drop-shadow(0 0 14px rgba(217,184,119,.5))}
+.f-name{
+  font-family:"Songti SC","STSong","Noto Serif SC",serif;
+  font-size:clamp(17px,5.4vw,21px);font-weight:600;letter-spacing:.14em;color:var(--gold-2);
+}
+.f-en{font-size:10px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase}
+
+/* ---------- 结果 ---------- */
+.result{
+  width:100%;
+  display:none;
+  flex-direction:column;
+  gap:10px;
+  padding:18px 18px 16px;
+  border-radius:var(--radius);
+  border:1px solid rgba(217,184,119,.22);
+  background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  animation:rise .5s ease both;
+}
+.result.show{display:flex}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.r-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.badge{
+  font-size:11.5px;letter-spacing:.12em;
+  padding:4px 10px;border-radius:999px;
+  border:1px solid rgba(217,184,119,.5);
+  color:var(--gold-2);background:rgba(217,184,119,.12);
+  white-space:nowrap;
+}
+.badge.rev{border-color:rgba(180,140,255,.55);color:#d9c8ff;background:rgba(150,110,255,.14)}
+.r-name{margin:0;font-size:18px;font-weight:600;letter-spacing:.06em;color:var(--gold-2)}
+.r-kw{margin:0;font-size:13px;color:var(--gold);letter-spacing:.06em}
+.r-text{margin:0;font-size:15px;line-height:1.75;color:#ddd8f2}
+.r-q{
+  margin:0;font-size:12.5px;color:var(--muted);
+  padding-left:10px;border-left:2px solid rgba(217,184,119,.4);
+  line-height:1.6;word-break:break-word;
+}
+.again{margin-top:4px;background:transparent;color:var(--gold-2);border:1px solid rgba(217,184,119,.5);box-shadow:none;font-weight:500}
+.again:active{transform:translateY(2px)}
+
+footer{
+  position:relative;z-index:1;
+  margin-top:auto;padding-top:22px;
+  font-size:11.5px;color:#5f5885;letter-spacing:.06em;text-align:center;
+}
+
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition-duration:.01ms!important}
+  .card{transition:transform .01ms}
+}
+/* 横屏/大屏微调 */
+@media (min-height:760px) and (min-width:390px){
+  .card{width:min(56vw,214px)}
+}
+</style>
+</head>
+<body>
+<div id="sky" aria-hidden="true"></div>
+
+<main>
+  <header>
+    <h1>塔 罗 占 卜</h1>
+    <p>心中默念你的问题，然后抽一张牌</p>
+  </header>
+
+  <div class="ask">
+    <input id="q" type="text" inputmode="text" autocomplete="off"
+           placeholder="写下你的问题…（也可以留空）" aria-label="你的问题">
+    <button id="draw">抽 一 张 牌</button>
+  </div>
+
+  <div class="stage">
+    <div class="card" id="card">
+      <div class="face back"><div class="back-inner">✦</div></div>
+      <div class="face front">
+        <span class="f-num" id="fNum">0</span>
+        <div class="front-inner" id="frontInner">
+          <div class="f-sym" id="fSym">🃏</div>
+          <div class="f-name" id="fName">愚者</div>
+          <div class="f-en" id="fEn">The Fool</div>
+        </div>
+        <span class="f-num br" id="fNum2">0</span>
+      </div>
+    </div>
+  </div>
+
+  <section class="result" id="result" aria-live="polite">
+    <p class="r-q" id="rQ"></p>
+    <div class="r-head">
+      <span class="badge" id="rOrient">正位</span>
+      <h2 class="r-name" id="rName">愚者</h2>
+    </div>
+    <p class="r-kw" id="rKw"></p>
+    <p class="r-text" id="rText"></p>
+    <button class="again" id="again">再抽一张</button>
+  </section>
+
+  <footer>仅供娱乐 · 命运始终在你手里</footer>
+</main>
+
+<script>
+/* ============ 大阿卡纳 22 张 ============ */
+var DECK = [
+  {n:0, name:'愚者', en:'The Fool', sym:'🃏', kw:'新的开始',
+   up:'放下顾虑，大胆迈出第一步——这件事值得一试，哪怕你觉得自己还没准备好。',
+   rev:'你可能把它想得太简单了。先别急着冲，把风险想清楚再行动。'},
+  {n:1, name:'魔术师', en:'The Magician', sym:'🎩', kw:'能力具足',
+   up:'你其实已经具备做成这件事的条件，缺的只是动手。现在正是时候。',
+   rev:'想法很多但没落地，或者有人在夸大其词。先看行动，别信承诺。'},
+  {n:2, name:'女祭司', en:'The High Priestess', sym:'🌙', kw:'倾听直觉',
+   up:'答案你心里其实已经有了，静下来听自己的声音。现在适合观察，而不是行动。',
+   rev:'你可能在回避某个不想面对的真相，或者有人对你隐瞒了信息。'},
+  {n:3, name:'女皇', en:'The Empress', sym:'🌷', kw:'丰盛滋养',
+   up:'会有一个好结果，而且是被滋养、被照顾的那种好。放心去做。',
+   rev:'投入太多反而失衡——不论是感情还是精力，先照顾好自己。'},
+  {n:4, name:'皇帝', en:'The Emperor', sym:'🏛️', kw:'掌控秩序',
+   up:'靠秩序和计划取胜。把规则、时间、资源理清楚，你会赢。',
+   rev:'太想控制反而卡住。试试换个方法，或者听听别人的意见。'},
+  {n:5, name:'教皇', en:'The Hierophant', sym:'📜', kw:'寻求指引',
+   up:'去寻找有经验的人，或者遵循成熟的惯例，别自己硬闯。',
+   rev:'旧规矩不一定适合你。可以质疑、可以打破，但要承担后果。'},
+  {n:6, name:'恋人', en:'The Lovers', sym:'💞', kw:'选择与共鸣',
+   up:'会有一段和谐的关系或一次心甘情愿的选择——听从本心。',
+   rev:'价值观不一致，或者你在两难之间摇摆。别为了讨好别人做决定。'},
+  {n:7, name:'战车', en:'The Chariot', sym:'🏇', kw:'意志突破',
+   up:'只要方向明确、全力以赴，就能突破。速战速决。',
+   rev:'方向不明就猛冲会翻车，或有两股力量在互相拉扯。先稳住。'},
+  {n:8, name:'力量', en:'Strength', sym:'🦁', kw:'以柔克刚',
+   up:'不需要硬碰硬，用耐心和温柔就能驯服局面。你撑得住。',
+   rev:'信心不足，或被情绪牵着走。先恢复体力与心力。'},
+  {n:9, name:'隐士', en:'The Hermit', sym:'🕯️', kw:'独处内省',
+   up:'答案不在外面。给自己一点安静的时间，答案会自己浮现。',
+   rev:'独处太久变成了逃避。该出去见见人了。'},
+  {n:10, name:'命运之轮', en:'Wheel of Fortune', sym:'🎡', kw:'转机将至',
+   up:'局势正在转动，而且是往好的方向。顺势而为。',
+   rev:'同样的问题反复出现，说明该改变做法，而不是继续等运气。'},
+  {n:11, name:'正义', en:'Justice', sym:'⚖️', kw:'公平因果',
+   up:'因果清晰，你会得到与付出相称的结果。诚实为上。',
+   rev:'存在不公平或推卸责任。保留证据，别吃哑巴亏。'},
+  {n:12, name:'倒吊人', en:'The Hanged Man', sym:'🙃', kw:'换个角度',
+   up:'现在不是推进的时候，停下来反而能看到新路。',
+   rev:'无谓的牺牲与拖延。该放下的就放下。'},
+  {n:13, name:'死神', en:'Death', sym:'🦋', kw:'结束即开始',
+   up:'有件事必须画上句号，之后是新生。别抓着不放。',
+   rev:'你明知该结束了却还在硬撑，这会持续消耗你。'},
+  {n:14, name:'节制', en:'Temperance', sym:'🍶', kw:'平衡调和',
+   up:'不偏不倚、慢慢调和，会有恰到好处的结局。',
+   rev:'用力过猛或过于极端，把节奏调回来。'},
+  {n:15, name:'恶魔', en:'The Devil', sym:'😈', kw:'诱惑束缚',
+   up:'有短期甜头但代价不小，小心上瘾或被人拿捏。',
+   rev:'你正在挣脱某个束缚，坚持住，快出来了。'},
+  {n:16, name:'高塔', en:'The Tower', sym:'⚡', kw:'突变冲击',
+   up:'会有一次突然的崩塌，但它清掉的本来就不稳的东西。',
+   rev:'危机在缓解，但根源问题还没解决。趁现在修地基。'},
+  {n:17, name:'星星', en:'The Star', sym:'⭐', kw:'希望重燃',
+   up:'最坏的时候过去了，愿望有实现的可能。保持信念。',
+   rev:'期待落空或信心动摇。降低预期，重新校准愿望。'},
+  {n:18, name:'月亮', en:'The Moon', sym:'🌕', kw:'迷雾未散',
+   up:'信息不全，真假难辨。现在不适合下判断。',
+   rev:'真相正在浮现，你快要看清楚了。再等等。'},
+  {n:19, name:'太阳', en:'The Sun', sym:'☀️', kw:'大吉光明',
+   up:'极好的一张牌——成功、快乐、光明正大。放心去要。',
+   rev:'结果还是好的，只是比你想的慢一点。'},
+  {n:20, name:'审判', en:'Judgement', sym:'📯', kw:'觉醒召唤',
+   up:'是时候做个总结、接受结果，然后重新出发。',
+   rev:'你还没原谅自己，或者不敢面对评判。放下包袱。'},
+  {n:21, name:'世界', en:'The World', sym:'🌍', kw:'圆满达成',
+   up:'一个阶段完美收官，你想要的会完整地实现。',
+   rev:'很接近了，但还差收尾。别在最后关头松劲。'}
+];
+
+var REVERSED_RATE = 0.35;   /* 逆位概率 */
+
+/* ============ 星空 ============ */
+(function buildSky(){
+  var sky = document.getElementById('sky');
+  var frag = document.createDocumentFragment();
+  for (var i = 0; i < 72; i++){
+    var s = document.createElement('i');
+    var size = (Math.random() * 1.7 + 0.6).toFixed(2);
+    s.style.left = (Math.random() * 100).toFixed(2) + '%';
+    s.style.top  = (Math.random() * 100).toFixed(2) + '%';
+    s.style.width = size + 'px';
+    s.style.height = size + 'px';
+    s.style.setProperty('--d', (Math.random() * 3.4 + 2).toFixed(2) + 's');
+    s.style.animationDelay = (Math.random() * 4).toFixed(2) + 's';
+    frag.appendChild(s);
+  }
+  sky.appendChild(frag);
+})();
+
+/* ============ 元素 ============ */
+var $ = function(id){ return document.getElementById(id); };
+var card = $('card'), frontInner = $('frontInner'), result = $('result');
+var btnDraw = $('draw'), btnAgain = $('again'), input = $('q');
+var busy = false;
+
+/* ============ 抽牌 ============ */
+function draw(){
+  if (busy) return;
+  busy = true;
+  btnDraw.disabled = true;
+
+  var q = (input.value || '').trim();
+  var c = DECK[Math.floor(Math.random() * DECK.length)];
+  var reversed = Math.random() < REVERSED_RATE;
+
+  /* 收起结果，回到牌背 */
+  result.classList.remove('show');
+  card.classList.remove('flipped');
+  frontInner.classList.remove('rev');
+  card.classList.add('shuffling');
+
+  if (navigator.vibrate) { try { navigator.vibrate(12); } catch (e) {} }
+
+  setTimeout(function(){
+    /* 洗牌结束 → 写入牌面 */
+    $('fNum').textContent  = c.n;
+    $('fNum2').textContent = c.n;
+    $('fSym').textContent  = c.sym;
+    $('fName').textContent = c.name;
+    $('fEn').textContent   = c.en;
+    if (reversed) frontInner.classList.add('rev');
+
+    card.classList.remove('shuffling');
+    card.classList.add('flipped');
+
+    /* 结果文字 */
+    $('rQ').textContent      = q ? '你的问题：' + q : '你没有写下问题，这张牌就当作给你的提示。';
+    $('rName').textContent   = c.name + ' · ' + c.en;
+    $('rKw').textContent     = '关键词：' + c.kw;
+    $('rText').textContent   = reversed ? c.rev : c.up;
+    var badge = $('rOrient');
+    badge.textContent = reversed ? '逆位' : '正位';
+    badge.className = 'badge' + (reversed ? ' rev' : '');
+
+    setTimeout(function(){
+      result.classList.add('show');
+      busy = false;
+      btnDraw.disabled = false;
+    }, 520);
+  }, 640);
+}
+
+btnDraw.addEventListener('click', draw);
+btnAgain.addEventListener('click', draw);
+input.addEventListener('keydown', function(e){
+  if (e.key === 'Enter') { input.blur(); draw(); }
+});
+</script>
+</body>
+</html>
