@@ -2,11 +2,20 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#000000">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Oracle">
+<link rel="apple-touch-startup-image" href="assets/splash/430x932@3x.jpg" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)">
+<link rel="apple-touch-startup-image" href="assets/splash/393x852@3x.jpg" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)">
+<link rel="apple-touch-startup-image" href="assets/splash/390x844@3x.jpg" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)">
+<link rel="apple-touch-startup-image" href="assets/splash/428x926@3x.jpg" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3)">
+<link rel="apple-touch-startup-image" href="assets/splash/375x812@3x.jpg" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)">
+<link rel="apple-touch-startup-image" href="assets/splash/414x896@3x.jpg" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3)">
+<link rel="apple-touch-startup-image" href="assets/splash/414x896@2x.jpg" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2)">
+<link rel="apple-touch-startup-image" href="assets/splash/375x667@2x.jpg" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)">
+<link rel="apple-touch-startup-image" href="assets/splash/414x736@3x.jpg" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3)">
 <meta name="description" content="Ask a question and receive an answer.">
 <title>Ask Oracle</title>
 <link rel="manifest" href="manifest.json">
@@ -33,15 +42,21 @@
   --btn:#2A2B29;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{height:100%}
+html,body{height:100%;overscroll-behavior:none}
 body{
   margin:0;background:#000;color:var(--ink);
   font-family:'Almendra',Georgia,'Times New Roman',serif;
+  position:fixed;inset:0;                 /* 彻底禁掉 iOS 的下拉回弹 */
   overflow:hidden;
   display:grid;place-items:center;
   padding:var(--sat) 0 var(--sab);
   -webkit-text-size-adjust:100%;
+  touch-action:manipulation;              /* 禁掉双击缩放 */
+  -webkit-user-select:none;user-select:none;
+  -webkit-touch-callout:none;             /* 禁掉长按弹出菜单 */
 }
+input,textarea{-webkit-user-select:text;user-select:text}
+img{-webkit-user-drag:none;user-drag:none}
 
 /* ---------- 舞台：按设计稿 428×926 等比缩放 ---------- */
 .stage{
