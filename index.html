@@ -1,1086 +1,440 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#070606">
+<meta name="theme-color" content="#000000">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="description" content="塔罗牌在线占卜 —— 写下你的问题，抽一张牌，得到针对这个问题的解读。">
-<meta property="og:title" content="塔罗占卜 · 抽一张牌">
-<meta property="og:description" content="写下你的问题，抽一张牌，得到针对这个问题的解读。">
-<meta property="og:type" content="website">
+<meta name="apple-mobile-web-app-title" content="Oracle">
+<meta name="description" content="Ask a question and receive an answer.">
+<title>Ask Oracle</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" sizes="64x64" href="icons/favicon-64.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon-180.png">
-<meta name="apple-mobile-web-app-title" content="塔罗占卜">
-<title>塔罗占卜 · 抽一张牌</title>
 <style>
+/* ---------- 字体（自托管 Almendra，离线可用）---------- */
+@font-face{font-family:'Almendra';src:url('fonts/almendra-400.woff2') format('woff2');
+  font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'Almendra';src:url('fonts/almendra-700.woff2') format('woff2');
+  font-weight:700;font-style:normal;font-display:swap}
+@font-face{font-family:'Almendra';src:url('fonts/almendra-400-italic.woff2') format('woff2');
+  font-weight:400;font-style:italic;font-display:swap}
+
 :root{
-  --bg:#070606;
-  --cream:#e9e1d5;
-  --cream-2:#c9c0b2;
-  --muted:#877f74;
-  --muted-2:#5f5951;
-  --gold:#e0bf6b;
-  --gold-hot:#fff7ae;
-  --gold-deep:#96762f;
-  --line:rgba(224,191,107,.22);
-  --line-soft:rgba(233,225,213,.11);
-  --serif:"Songti SC","STSong","Noto Serif SC","Source Han Serif SC","Times New Roman",Georgia,serif;
-  --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  --sat:env(safe-area-inset-top, 0px);
+  --sab:env(safe-area-inset-bottom, 0px);
+  /* 设计稿取色 */
+  --ink:#E3E1DB;
+  --ink-2:#D0C7B8;
+  --gold:#AC8D56;
+  --line:#D0C7B8;
+  --pill:rgba(208,204,201,.67);
+  --btn:#2A2B29;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%}
 body{
-  margin:0;
-  font-family:var(--sans);
-  color:var(--cream);
-  background:
-    radial-gradient(120% 65% at 50% 0%, #191510 0%, transparent 58%),
-    radial-gradient(110% 55% at 50% 100%, #141210 0%, transparent 62%),
-    var(--bg);
-  background-attachment:fixed;
-  min-height:100dvh;
+  margin:0;background:#000;color:var(--ink);
+  font-family:'Almendra',Georgia,'Times New Roman',serif;
+  overflow:hidden;
+  display:grid;place-items:center;
+  padding:var(--sat) 0 var(--sab);
   -webkit-text-size-adjust:100%;
-  overflow-x:hidden;
 }
 
-/* ---------- 星座背景 ---------- */
-#sky{position:fixed;inset:0;z-index:0;pointer-events:none}
-
-/* ---------- 布局 ---------- */
-.app{
-  position:relative;z-index:1;
-  width:100%;max-width:430px;margin:0 auto;
-  min-height:100dvh;
-  display:flex;flex-direction:column;align-items:center;
-  gap:14px;
-  padding:calc(env(safe-area-inset-top,0px) + 14px) 20px calc(env(safe-area-inset-bottom,0px) + 94px);
-}
-
-/* ---------- 顶栏 ---------- */
-.topbar{
-  width:100%;display:flex;align-items:center;justify-content:space-between;
-  min-height:36px;
-}
-.brand{
-  display:flex;align-items:center;gap:7px;
-  font-family:var(--serif);font-size:13px;letter-spacing:.24em;
-  color:var(--cream-2);
-}
-.brand .spark{color:var(--gold);font-size:12px}
-.icon-btn{
-  width:36px;height:36px;border-radius:50%;
-  border:1px solid var(--line-soft);background:transparent;
-  color:var(--cream-2);cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  transition:.22s;
-}
-.icon-btn:active{transform:scale(.93)}
-.icon-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.6;
-  stroke-linecap:round;stroke-linejoin:round}
-
-/* ---------- 问题 ---------- */
-.question{
-  margin:2px 0 0;
-  font-family:var(--serif);
-  font-size:clamp(16px,4.6vw,18.5px);
-  line-height:1.7;letter-spacing:.06em;
-  color:var(--cream);
-  text-align:center;
-  min-height:2.6em;
-  display:flex;align-items:center;justify-content:center;
-  padding:0 4px;
-  word-break:break-word;
-}
-.question.idle{color:var(--muted-2);font-size:clamp(14px,4.1vw,16px);letter-spacing:.14em}
-
-/* ---------- 牌 ---------- */
-.stage{perspective:1500px;perspective-origin:50% 35%;padding:2px 0}
-.card{
+/* ---------- 舞台：按设计稿 428×926 等比缩放 ---------- */
+.stage{
   position:relative;
-  width:min(66vw,252px);
-  aspect-ratio:3/4.15;
-  transform-style:preserve-3d;
-  transition:transform 1s cubic-bezier(.2,.86,.24,1);
-  will-change:transform;
+  width:428px;height:926px;flex:none;
+  transform:scale(var(--s, 1));
+  transform-origin:center center;
+  overflow:hidden;
+  background:#000;
 }
-.card.flipped{transform:rotateY(180deg)}
-.card.shuffling{animation:shuffle .68s ease-in-out}
-@keyframes shuffle{
-  0%{transform:rotate(0) translateY(0)}
-  18%{transform:rotate(-6deg) translateY(-9px)}
-  42%{transform:rotate(5deg) translateY(5px)}
-  68%{transform:rotate(-3.5deg) translateY(-3px)}
-  100%{transform:rotate(0) translateY(0)}
+.screen{
+  position:absolute;inset:0;
+  opacity:0;visibility:hidden;
+  transition:opacity .45s ease, visibility .45s;
 }
-.face{
-  position:absolute;inset:0;border-radius:19px;overflow:hidden;
-  backface-visibility:hidden;-webkit-backface-visibility:hidden;
-  border:1px solid var(--line);
-  box-shadow:0 26px 64px rgba(0,0,0,.8), 0 0 0 1px rgba(224,191,107,.05) inset;
-}
+.screen.active{opacity:1;visibility:visible}
 
-/* 牌背：曼陀罗纹样 + 金色四角星 */
-.back{
-  background:
-    radial-gradient(58% 42% at 50% 44%, rgba(224,191,107,.11), transparent 72%),
-    linear-gradient(170deg,#100e0c,#070606);
-  display:flex;align-items:center;justify-content:center;
+/* ---------- 背景层 ---------- */
+.bg,.person{position:absolute;pointer-events:none;display:block}
+.scrim{position:absolute;pointer-events:none}
+#screen-ask .bg{left:-47px;top:0;width:521px;height:926px}
+#screen-ask .person{left:1px;top:156px;width:426px;height:541px}
+#screen-ask .scrim{
+  left:0;top:191px;width:427px;height:735px;
+  background:linear-gradient(180deg,
+    rgba(0,0,0,0) 0%, rgba(0,0,0,.10) 26%, rgba(0,0,0,.46) 52%,
+    rgba(0,0,0,.80) 74%, rgba(0,0,0,.94) 100%);
 }
-.mandala{
-  position:absolute;inset:9%;border-radius:50%;
-  background:
-    repeating-conic-gradient(from 0deg at 50% 50%,
-      rgba(201,192,178,.20) 0deg 2deg, transparent 2deg 10.5deg),
-    repeating-radial-gradient(circle at 50% 50%,
-      rgba(201,192,178,.13) 0 1px, transparent 1px 7.5px);
-  -webkit-mask-image:radial-gradient(circle at 50% 50%, #000 20%, transparent 67%);
-  mask-image:radial-gradient(circle at 50% 50%, #000 20%, transparent 67%);
-  animation:spin 110s linear infinite;
-}
-@keyframes spin{to{transform:rotate(360deg)}}
-.spark-svg{
-  position:relative;
-  width:46%;height:auto;
-  filter:drop-shadow(0 0 18px rgba(255,247,174,.55)) drop-shadow(0 0 40px rgba(224,191,107,.3));
-  animation:pulse 4.2s ease-in-out infinite;
-}
-@keyframes pulse{0%,100%{opacity:.86;transform:scale(1)}50%{opacity:1;transform:scale(1.055)}}
+#screen-answer .base{position:absolute;inset:0;background:#353634}
+#screen-answer .bg{left:-53px;top:-12px;width:533px;height:950px}
+#screen-answer .person{left:-74px;top:0;width:542px;height:606px}
 
-/* 牌面：答案写在牌里 */
-.front{
-  transform:rotateY(180deg);
-  background:
-    radial-gradient(72% 44% at 50% 6%, rgba(224,191,107,.10), transparent 68%),
-    linear-gradient(180deg,#121110,#090807);
-  display:flex;align-items:center;justify-content:center;
-  padding:22px 18px;
+/* ---------- 顶部玻璃按钮 ---------- */
+.glass-btn{
+  position:absolute;width:44px;height:44px;border-radius:50%;
+  border:none;
+  background:#D0C7B8;
+  box-shadow:0 2px 8px rgba(0,0,0,.34),
+             inset 0 1px 0 rgba(255,255,255,.55),
+             0 0 0 1px rgba(255,255,255,.32);
+  display:grid;place-items:center;padding:0;cursor:pointer;
+  transition:transform .15s, filter .2s;
 }
-.front-inner{
-  width:100%;height:100%;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:9px;text-align:center;
-  transition:transform .55s ease;
-}
-/* 逆位：不旋转内容（保证答案可读），改用紫色描边 + 内发光区分 */
-.card.is-rev .front{
-  border-color:rgba(170,140,255,.42);
-  box-shadow:0 26px 64px rgba(0,0,0,.8), 0 0 30px rgba(150,110,255,.15) inset;
-}
-.front-inner.rev .card-spark{opacity:.7}
-.front-inner.rev .card-name{color:#d9c8ff}
-.card-spark{width:19px;height:19px;opacity:.9;
-  filter:drop-shadow(0 0 10px rgba(255,247,174,.6))}
-.card-orient{
-  font-family:var(--sans);font-size:10px;letter-spacing:.3em;
-  color:var(--gold);text-transform:uppercase;
-}
-.card-orient.rev{color:#c9b4ff}
-.card-name{
-  font-family:var(--serif);font-size:clamp(15px,4.4vw,17px);
-  letter-spacing:.14em;color:var(--gold-hot);
-}
-.card-rule{
-  width:34px;height:1px;margin:2px 0;
-  background:linear-gradient(90deg,transparent,var(--line),transparent);
-}
-.card-answer{
-  margin:0;
-  font-family:var(--serif);
-  font-size:clamp(13.5px,4vw,15.5px);
-  line-height:1.92;letter-spacing:.045em;
-  color:var(--cream);
-  padding:0 2px;
-}
-.card-topic{
-  margin-top:2px;
-  font-family:var(--sans);font-size:10.5px;letter-spacing:.16em;
-  color:var(--muted);
-}
+.glass-btn:active{transform:scale(.92);filter:brightness(1.06)}
+.glass-btn img{width:23px;height:24px;display:block}
+.glass-btn.share img{width:24px;height:24px}
+#screen-ask .btn-home{left:24px;top:48px}
+#screen-ask .btn-share{left:359px;top:48px}
+#screen-answer .btn-home{left:24px;top:48px}
+#screen-answer .btn-share{left:360px;top:48px}
 
-/* ---------- 牌外说明 ---------- */
-.caption{
-  margin:0;font-family:var(--serif);
-  font-size:12.5px;line-height:1.75;letter-spacing:.05em;
-  color:var(--muted);text-align:center;
-  max-width:300px;padding:0 4px;
-  min-height:0;
+/* ---------- 输入页文字 ---------- */
+.greeting{
+  position:absolute;left:38px;top:577px;width:310px;
+  font-size:36px;font-weight:700;line-height:46.656px;
+  color:var(--ink);letter-spacing:.1px;
 }
-.caption .k{color:var(--cream-2)}
-.meta{
-  margin:0;font-size:10.5px;letter-spacing:.1em;color:var(--muted-2);
-  text-align:center;
+.subtitle{
+  position:absolute;left:38px;top:718px;width:326px;
+  font-size:14px;font-weight:400;line-height:24px;color:var(--gold);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
-
-/* ---------- 胶囊按钮 ---------- */
-.pill{
-  font-family:var(--serif);
-  font-size:13.5px;letter-spacing:.26em;
-  color:var(--cream-2);
-  background:transparent;
-  border:1px solid var(--line);
-  border-radius:999px;
-  padding:12px 30px;min-height:46px;
-  cursor:pointer;
-  transition:border-color .25s, color .25s, transform .12s;
-  text-indent:.26em;
-}
-.pill:active{transform:scale(.97)}
-.pill:disabled{opacity:.45}
-.pill:hover{border-color:rgba(224,191,107,.5);color:var(--gold)}
-
-/* ---------- 话题 chips ---------- */
-.topic-hint{
-  margin:0;font-size:10.5px;letter-spacing:.1em;color:var(--muted-2);
-  text-align:center;min-height:1.4em;
-}
-.chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-width:330px}
-.chip{
-  font-family:var(--sans);font-size:11.5px;letter-spacing:.05em;
-  color:var(--muted);background:transparent;
-  border:1px solid var(--line-soft);border-radius:999px;
-  padding:0 11px;min-height:30px;cursor:pointer;
-  display:inline-flex;align-items:center;gap:3px;
-  transition:color .2s, border-color .2s, background .2s;
-}
-.chip.on{
-  color:var(--gold);border-color:rgba(224,191,107,.55);
-  background:rgba(224,191,107,.08);
-}
-.chip:active{transform:scale(.95)}
 
 /* ---------- 底部输入条 ---------- */
 .composer{
-  position:fixed;left:50%;transform:translateX(-50%);
-  bottom:calc(env(safe-area-inset-bottom,0px) + 10px);
-  width:min(calc(100% - 36px), 394px);
-  z-index:15;
-  display:flex;align-items:center;gap:9px;
-  padding:5px 5px 5px 18px;
-  border-radius:999px;
-  border:1px solid var(--line-soft);
-  background:rgba(10,9,8,.9);
-  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
-  box-shadow:0 8px 28px rgba(0,0,0,.62);
-}
-.composer input{
-  flex:1;min-width:0;
-  border:none;background:transparent;outline:none;
-  font-family:var(--serif);font-size:16px;letter-spacing:.04em;
-  color:var(--cream);padding:12px 0;
-}
-.composer input::placeholder{color:var(--muted-2);letter-spacing:.06em}
-.send{
-  width:42px;height:42px;flex:0 0 42px;
-  border-radius:50%;border:none;cursor:pointer;
-  background:linear-gradient(180deg,var(--gold-hot),var(--gold));
-  color:#241a08;
-  display:flex;align-items:center;justify-content:center;
-  box-shadow:0 4px 18px rgba(224,191,107,.3);
-  transition:transform .12s;
-}
-.send:active{transform:scale(.92)}
-.send:disabled{opacity:.5;box-shadow:none}
-.send svg{width:17px;height:17px;fill:currentColor}
-
-/* ---------- 安装提示条 ---------- */
-.install{
-  position:fixed;left:14px;right:14px;
-  bottom:calc(env(safe-area-inset-bottom,0px) + 88px);
-  z-index:20;
-  display:flex;align-items:center;gap:8px;
-  padding:12px 10px 12px 15px;
-  border-radius:15px;
+  position:absolute;left:38px;width:353px;height:46px;
+  border-radius:23px;
+  background:var(--pill);
   border:1px solid var(--line);
-  background:rgba(14,12,10,.96);
+  backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
+  display:flex;align-items:center;
+  padding:0 21px 0 9px;gap:9px;
+}
+#screen-ask .composer{top:844px}
+#screen-answer .composer{top:856px}
+.mic{
+  flex:0 0 38px;width:38px;height:38px;border-radius:50%;
+  border:none;cursor:pointer;padding:0;
+  background:radial-gradient(circle at 38% 32%, #F3ECDC, #D5CCB8 68%, #BFB49C);
+  box-shadow:0 1px 4px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.6);
+  display:grid;place-items:center;
+  transition:transform .15s;
+}
+.mic:active{transform:scale(.92)}
+.mic svg{width:17px;height:17px;fill:rgba(58,52,42,.42)}
+.mic.listening{animation:pulse 1.1s ease-in-out infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(172,141,86,.55)}50%{box-shadow:0 0 0 7px rgba(172,141,86,0)}}
+.composer input{
+  flex:1;min-width:0;border:none;background:transparent;outline:none;
+  font-family:inherit;font-size:16px;line-height:24px;color:var(--ink);
+  padding:0;
+}
+.composer input::placeholder{color:var(--ink);opacity:.92}
+.kbd{
+  flex:0 0 24px;width:24px;height:24px;border:none;background:transparent;
+  padding:0;cursor:pointer;
+}
+.kbd img{width:24px;height:24px;display:block}
+
+/* ---------- 解答页 ---------- */
+.question{
+  position:absolute;left:34px;top:110px;width:360px;
+  font-size:24px;font-weight:700;line-height:31.104px;
+  color:var(--ink-2);text-align:center;
+}
+.answer-card{
+  position:absolute;left:100px;top:242px;width:224px;height:383px;
+  border-radius:15px;
+  background:linear-gradient(180deg,#221E1E 0%,#362F2F 20%,#423A3A 40%,#534848 52%,#655757 72%,#7E6D6D 100%);
+  border:3px solid #E3E1DB;
+  display:flex;align-items:center;
+  padding:24px 13px 56px 25px;
+  overflow:hidden;
+}
+.answer-card p{
+  margin:0;
+  font-size:24px;font-weight:400;line-height:31.104px;
+  color:var(--ink-2);
+}
+.answer-card em{font-style:normal;color:var(--gold)}
+#screen-answer.active .answer-card{
+  animation:cardIn .7s cubic-bezier(.2,.8,.25,1) both;
+}
+@keyframes cardIn{
+  0%{opacity:0;transform:translateY(22px) scale(.94)}
+  100%{opacity:1;transform:translateY(0) scale(1)}
+}
+#screen-answer.active .answer-card p{animation:fadeUp .6s ease .28s both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+.btn-similar{
+  position:absolute;left:79px;top:784px;width:270px;height:46px;
+  border-radius:23px;
+  background:var(--btn);
+  border:1px solid #FFFFFF;
+  color:var(--ink-2);
+  font-family:inherit;font-size:20px;font-weight:700;line-height:25.92px;
+  cursor:pointer;padding-left:10px;
+  box-shadow:0 4px 4px rgba(0,0,0,.25), 0 0 20px rgba(227,225,219,.30);
+  transition:transform .15s, box-shadow .25s;
+}
+.btn-similar:active{transform:scale(.97);box-shadow:0 2px 4px rgba(0,0,0,.3), 0 0 30px rgba(227,225,219,.45)}
+
+/* ---------- 安装提示（仅 iOS，延迟出现，可关闭）---------- */
+.install{
+  position:fixed;left:16px;right:16px;
+  bottom:calc(var(--sab) + 16px);z-index:20;
+  display:flex;align-items:center;gap:10px;
+  padding:12px 10px 12px 15px;border-radius:14px;
+  border:1px solid rgba(227,225,219,.28);
+  background:rgba(18,17,16,.95);
   backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
-  box-shadow:0 12px 34px rgba(0,0,0,.7);
-  animation:rise .45s ease both;
+  font-size:13px;line-height:1.55;color:var(--ink-2);
 }
 .install[hidden]{display:none}
-.install-txt{flex:1;font-family:var(--serif);font-size:12.5px;line-height:1.6;color:var(--cream-2)}
-.install-btn{
-  font-family:var(--sans);font-size:12.5px;font-weight:600;color:#241a08;
-  border:none;border-radius:9px;padding:9px 14px;min-height:36px;
-  cursor:pointer;white-space:nowrap;
-  background:linear-gradient(180deg,var(--gold-hot),var(--gold));
+.install span{flex:1}
+.install button{
+  font-family:inherit;font-size:13px;font-weight:700;color:#1E1B16;
+  border:none;border-radius:9px;padding:9px 14px;cursor:pointer;
+  background:linear-gradient(180deg,#F3ECDC,#CFC6B7);
 }
-.install-btn[hidden]{display:none}
-.install-x{
-  background:transparent;border:none;color:var(--muted-2);
-  font-size:14px;padding:6px 8px;cursor:pointer;line-height:1;
-}
-
-/* ---------- 提示气泡 ---------- */
-.toast{
-  position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 150px);
-  transform:translateX(-50%) translateY(10px);
-  z-index:30;
-  padding:9px 18px;border-radius:999px;
-  background:rgba(224,191,107,.94);color:#241a08;
-  font-size:12.5px;letter-spacing:.06em;
-  opacity:0;pointer-events:none;transition:opacity .25s, transform .25s;
-}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-
-@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.install .x{background:transparent;color:#8A8378;font-weight:400;padding:6px 8px}
 
 @media (prefers-reduced-motion:reduce){
   *{animation:none!important;transition-duration:.01ms!important}
-  .card{transition:transform .01ms}
-}
-@media (max-height:700px){
-  .card{width:min(56vw,206px)}
-  .question{min-height:2.2em}
 }
 </style>
 </head>
 <body>
-<canvas id="sky" aria-hidden="true"></canvas>
 
-<div class="app">
-  <!-- 顶栏 -->
-  <div class="topbar">
-    <div class="brand"><span class="spark">✦</span>塔罗占卜</div>
-    <button class="icon-btn" id="share" aria-label="分享">
-      <svg viewBox="0 0 24 24"><path d="M12 16V4M12 4l-4 4M12 4l4 4M5 14v5a1 1 0 001 1h12a1 1 0 001-1v-5"/></svg>
+<div class="stage" id="stage">
+
+  <!-- ==================== 输入页 ==================== -->
+  <section class="screen ask active" id="screen-ask">
+    <img class="bg"     src="assets/bg-ask.webp"     alt="">
+    <img class="person" src="assets/person-ask.webp" alt="">
+    <div class="scrim"></div>
+
+    <button class="glass-btn btn-home"  id="home1" aria-label="Home">
+      <img src="assets/icon-home.svg" alt="">
     </button>
-  </div>
+    <button class="glass-btn share btn-share" id="share1" aria-label="Share">
+      <img src="assets/icon-share.svg" alt="">
+    </button>
 
-  <!-- 问题 -->
-  <p class="question idle" id="question">在心里默念你的问题</p>
+    <div class="greeting">Hello Crystal.Yao,<br>What would you like to ask?</div>
+    <div class="subtitle">My Mercury Retrograde Status | Recent Career Horoscope</div>
 
-  <!-- 牌 -->
-  <div class="stage">
-    <div class="card" id="card">
-      <div class="face back">
-        <div class="mandala"></div>
-        <svg class="spark-svg" viewBox="0 0 100 100" aria-hidden="true">
-          <defs>
-            <radialGradient id="sg" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stop-color="#fffdf0"/>
-              <stop offset="42%" stop-color="#fff7ae"/>
-              <stop offset="100%" stop-color="#d8b055"/>
-            </radialGradient>
-          </defs>
-          <path fill="url(#sg)" d="M50,1 C52.4,29.6 70.4,47.6 99,50 C70.4,52.4 52.4,70.4 50,99 C47.6,70.4 29.6,52.4 1,50 C29.6,47.6 47.6,29.6 50,1 Z"/>
-        </svg>
-      </div>
+    <form class="composer" id="composer1" autocomplete="off">
+      <button type="button" class="mic" id="mic1" aria-label="Speak">
+        <svg viewBox="0 0 24 24"><path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v5a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-4 4.9V19h2.5a.9.9 0 1 1 0 1.8h-7a.9.9 0 1 1 0-1.8H11v-3.1A5 5 0 0 1 7 11a.9.9 0 1 1 1.8 0 3.2 3.2 0 0 0 6.4 0 .9.9 0 1 1 1.8 0z"/></svg>
+      </button>
+      <input id="q1" type="text" placeholder="Press to start speaking..." aria-label="Your question">
+      <button type="button" class="kbd" id="kbd1" aria-label="Keyboard">
+        <img src="assets/icon-keyboard.svg" alt="">
+      </button>
+    </form>
+  </section>
 
-      <div class="face front">
-        <div class="front-inner" id="frontInner">
-          <svg class="card-spark" viewBox="0 0 100 100" aria-hidden="true">
-            <path fill="#e0bf6b" d="M50,1 C52.4,29.6 70.4,47.6 99,50 C70.4,52.4 52.4,70.4 50,99 C47.6,70.4 29.6,52.4 1,50 C29.6,47.6 47.6,29.6 50,1 Z"/>
-          </svg>
-          <div class="card-orient" id="cardOrient">正位</div>
-          <div class="card-name" id="cardName">愚者 · The Fool</div>
-          <div class="card-rule"></div>
-          <p class="card-answer" id="cardAnswer">带着好奇心出发，不必等万事俱备。</p>
-          <div class="card-topic" id="cardTopic">✨ 通用</div>
-        </div>
-      </div>
+  <!-- ==================== 解答页 ==================== -->
+  <section class="screen answer" id="screen-answer">
+    <div class="base"></div>
+    <img class="bg"     src="assets/bg-answer.webp"     alt="">
+    <img class="person" src="assets/person-answer.webp" alt="">
+
+    <button class="glass-btn btn-home"  id="home2" aria-label="Home">
+      <img src="assets/icon-home.svg" alt="">
+    </button>
+    <button class="glass-btn share btn-share" id="share2" aria-label="Share">
+      <img src="assets/icon-share.svg" alt="">
+    </button>
+
+    <div class="question" id="question">What's for dinner tonight?</div>
+
+    <div class="answer-card">
+      <p id="answer"></p>
     </div>
-  </div>
 
-  <!-- 牌外说明 -->
-  <p class="caption" id="caption"></p>
-  <p class="meta" id="meta"></p>
+    <button class="btn-similar" id="similar">View similar case</button>
 
-  <button class="pill" id="again">抽 一 张 牌</button>
+    <form class="composer" id="composer2" autocomplete="off">
+      <button type="button" class="mic" id="mic2" aria-label="Speak">
+        <svg viewBox="0 0 24 24"><path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v5a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-4 4.9V19h2.5a.9.9 0 1 1 0 1.8h-7a.9.9 0 1 1 0-1.8H11v-3.1A5 5 0 0 1 7 11a.9.9 0 1 1 1.8 0 3.2 3.2 0 0 0 6.4 0 .9.9 0 1 1 1.8 0z"/></svg>
+      </button>
+      <input id="q2" type="text" placeholder="Press to start speaking..." aria-label="Your question">
+      <button type="button" class="kbd" id="kbd2" aria-label="Keyboard">
+        <img src="assets/icon-keyboard.svg" alt="">
+      </button>
+    </form>
+  </section>
 
-  <p class="topic-hint" id="topicHint">这个问题属于…（自动识别，可手动改）</p>
-  <div class="chips" id="topics" role="group" aria-label="问题话题"></div>
-
-  <!-- 底部输入 -->
-  <div class="composer">
-    <input id="q" type="text" inputmode="text" autocomplete="off"
-           placeholder="写下你的问题…" aria-label="你的问题">
-    <button class="send" id="draw" aria-label="抽牌">
-      <svg viewBox="0 0 24 24"><path d="M12 2.6c.5 6 4.3 9.4 10 10-5.7.6-9.5 4-10 10-.5-6-4.3-9.4-10-10 5.7-.6 9.5-4 10-10z"/></svg>
-    </button>
-  </div>
 </div>
 
 <div class="install" id="install" hidden>
-  <span class="install-txt" id="installTxt"></span>
-  <button class="install-btn" id="installBtn" hidden>安装</button>
-  <button class="install-x" id="installX" aria-label="关闭提示">✕</button>
+  <span id="installTxt"></span>
+  <button id="installBtn" hidden>Install</button>
+  <button class="x" id="installX" aria-label="Close">✕</button>
 </div>
 
-<div class="toast" id="toast"></div>
-
+<script src="answers.js"></script>
 <script>
-/* =========================================================
-   1. 大阿卡纳 22 张 —— 提供牌名与通用牌意
-   ========================================================= */
-var DECK = [
-  {n:0, name:'愚者', en:'The Fool', kw:'新的开始',
-   up:'带着好奇心出发，不必等万事俱备。', rev:'冲得太快容易踩空，先看清脚下。'},
-  {n:1, name:'魔术师', en:'The Magician', kw:'能力具足',
-   up:'你手上的工具已经够了，缺的只是动手。', rev:'说得多做得少，或者有人在夸大其词。'},
-  {n:2, name:'女祭司', en:'The High Priestess', kw:'倾听直觉',
-   up:'先安静观察，答案会自己浮现。', rev:'有件事你不想面对，或者信息被人藏着。'},
-  {n:3, name:'女皇', en:'The Empress', kw:'丰盛滋养',
-   up:'被照顾、被滋养的走向。', rev:'投入过头失了平衡，先照顾自己。'},
-  {n:4, name:'皇帝', en:'The Emperor', kw:'掌控秩序',
-   up:'靠规则和计划推进，稳扎稳打。', rev:'抓得太紧反而卡住，试试松手。'},
-  {n:5, name:'教皇', en:'The Hierophant', kw:'寻求指引',
-   up:'去找有经验的人，或遵循成熟的做法。', rev:'旧规矩不一定适合你，可以质疑。'},
-  {n:6, name:'恋人', en:'The Lovers', kw:'选择与共鸣',
-   up:'和谐的关系，心甘情愿的选择。', rev:'价值观不一致，或夹在两难之间。'},
-  {n:7, name:'战车', en:'The Chariot', kw:'意志突破',
-   up:'方向明确就全力冲，速战速决。', rev:'方向不明猛冲会翻车，先稳住。'},
-  {n:8, name:'力量', en:'Strength', kw:'以柔克刚',
-   up:'用耐心驯服局面，不必硬碰硬。', rev:'信心不足，被情绪牵着走。'},
-  {n:9, name:'隐士', en:'The Hermit', kw:'独处内省',
-   up:'答案在里面不在外面，给自己安静。', rev:'独处太久变成逃避，该出门了。'},
-  {n:10, name:'命运之轮', en:'Wheel of Fortune', kw:'转机将至',
-   up:'局势正在转动，顺势而为。', rev:'同样的问题反复出现，该换做法了。'},
-  {n:11, name:'正义', en:'Justice', kw:'公平因果',
-   up:'你会得到与付出相称的结果。', rev:'存在不公平或推卸责任，留好凭据。'},
-  {n:12, name:'倒吊人', en:'The Hanged Man', kw:'换个角度',
-   up:'现在不是推进的时候，停下反而有路。', rev:'无谓的牺牲和拖延，该放下了。'},
-  {n:13, name:'死神', en:'Death', kw:'结束即开始',
-   up:'有件事该画句号了，之后是新生。', rev:'明知该结束却还在硬撑。'},
-  {n:14, name:'节制', en:'Temperance', kw:'平衡调和',
-   up:'不偏不倚，慢慢调和出好结果。', rev:'用力过猛或太极端，把节奏调回来。'},
-  {n:15, name:'恶魔', en:'The Devil', kw:'诱惑束缚',
-   up:'短期甜头，代价不小，小心被拿捏。', rev:'你正在挣脱束缚，坚持住。'},
-  {n:16, name:'高塔', en:'The Tower', kw:'突变冲击',
-   up:'一次突然的崩塌，清掉本就不稳的东西。', rev:'危机在缓解，但根源还没修好。'},
-  {n:17, name:'星星', en:'The Star', kw:'希望重燃',
-   up:'最坏的时候过去了，愿望有实现的可能。', rev:'期待落空，重新校准愿望。'},
-  {n:18, name:'月亮', en:'The Moon', kw:'迷雾未散',
-   up:'信息不全，真假难辨，先别下判断。', rev:'真相正在浮现，快看清楚了。'},
-  {n:19, name:'太阳', en:'The Sun', kw:'大吉光明',
-   up:'极好的一张牌，成功、快乐、坦荡。', rev:'结果仍然好，只是比想的慢。'},
-  {n:20, name:'审判', en:'Judgement', kw:'觉醒召唤',
-   up:'做个总结，接受结果，重新出发。', rev:'还没原谅自己，或不敢面对评判。'},
-  {n:21, name:'世界', en:'The World', kw:'圆满达成',
-   up:'一个阶段完美收官，完整实现。', rev:'很接近了，别在收尾时松劲。'}
-];
-
-var REVERSED_RATE = 0.35;
-
-/* =========================================================
-   2. 话题答案库 —— 每个话题各有独立的「正位库」「逆位库」
-   ========================================================= */
-var TOPICS = {
-
-  love: {
-    label:'感情', icon:'💗',
-    keys:['喜欢','爱','暗恋','表白','告白','追求','心动','男朋友','女朋友','男友','女友','对象','恋爱','分手','复合','挽回','暧昧','结婚','婚姻','相亲','感情','前任','异地','脱单','单身','缘分','在一起','忽冷忽热','冷淡','约会','婚'],
-    up:[
-      '有戏。对方的注意力其实已经落在你身上了，只是还没找到开口的时机。',
-      '会成。你主动迈出那一步，关系就会顺势往前推。',
-      '这段感情有继续走下去的底子，别急着下结论。',
-      '你担心的那件事，大概率不会发生，可以放心。',
-      '对方对你有好感，只是表达比较含蓄，别用「他不够热情」来误判。',
-      '复合是有机会的，但前提是先把当初分开的原因摊开说清楚。',
-      '关系会往更稳定的方向走，你们正处在磨合之后的升温期。',
-      '你是被喜欢的那一方，可以稍微放松一点。',
-      '有新的缘分在靠近，可能来自你原本不太留意的圈子。',
-      '现在适合表达心意，时机比你想象的好。',
-      '这段关系能给你安全感，值得投入。',
-      '会有一个明确的答案给你，不用再猜来猜去了。',
-      '你们之间的默契比表面看起来更深，别被一时的冷淡吓退。',
-      '对方的犹豫不是不喜欢，而是在权衡现实问题，给他一点时间。',
-      '你的直觉是对的，这段感情值得再试一次。',
-      '有转机。之前的误会会被解开。'
-    ],
-    rev:[
-      '现在不是推进的好时机，对方的心还没定下来。',
-      '你在这段关系里付出的比收到的多，这个失衡需要被看见。',
-      '有第三方因素或现实阻力（家人、距离、工作），不是你们不够喜欢。',
-      '对方的承诺要打个问号，先看行动再看话。',
-      '复合的难度偏大，勉强在一起容易重蹈覆辙。',
-      '你可能把「习惯」当成了「喜欢」，先分清楚。',
-      '这段关系里的问题不会自己消失，需要有人先开口。',
-      '对方态度模糊，是因为他也在两难，别替他做决定。',
-      '你太用力了。抓得越紧，对方越想退。',
-      '会有一次失望，但这不是终点，只是让你看清一些事。',
-      '别为了不孤单而将就，这次的答案是「再等等」。',
-      '你在回避一个已经很明显的事实。',
-      '感情上的消耗大于滋养，你需要为自己设一条底线。',
-      '短期内不会有明确答复，做好等待或放手的准备。',
-      '表白成功的概率不高，建议先把关系处得更自然。',
-      '旧的问题会再次浮现，不解决的话，换个人也会遇到。'
-    ]
-  },
-
-  career: {
-    label:'事业', icon:'💼',
-    keys:['工作','事业','职场','求职','面试','简历','offer','录用','升职','晋升','加薪','涨薪','跳槽','离职','辞职','老板','领导','同事','项目','创业','副业','试用期','转正','裁员','绩效','考核','公司','就业','打工','实习','岗位','职业'],
-    up:[
-      '会有好消息，你投出去的努力正在被看见。',
-      '这次机会能拿下，你的准备比你以为的充分。',
-      '适合主动争取，上面的人对你的印象不差。',
-      '工作会往更稳定的方向走，短期辛苦是值得的。',
-      '你的能力在这里是够用的，别被「我不配」劝退。',
-      '会有贵人出现，很可能是一个比你资深的人。',
-      '转型或换方向是可行的，你的可迁移能力比想象中强。',
-      '面试或考核会顺利，临场发挥是你的加分项。',
-      '加薪或晋升有希望，但需要你先提出来。',
-      '手上这个项目能做成，关键在前期把需求对齐。',
-      '你在团队里的位置会变重要，接住它。',
-      '适合开始一个副业或小尝试，成本可控。',
-      '之前的付出会在这个阶段回本。',
-      '会有人主动给你机会，认真对待。',
-      '你的方案思路是对的，坚持推下去。',
-      '这次变动对你有利，哪怕过程有点折腾。'
-    ],
-    rev:[
-      '现在的大环境不太支持冒进，先稳住手头的事。',
-      '有人在含糊其辞，重要的条件一定要落到白纸黑字。',
-      '你低估了这件事的难度，重新评估一下时间和精力。',
-      '这次竞争会比较激烈，提前准备备选方案。',
-      '你的努力可能没落在关键点上，先确认对方真正要什么。',
-      '团队里有沟通不畅或责任不清的问题，保护好自己。',
-      '跳槽的时机还差一点，先把手上的事收尾。',
-      '承诺的回报可能会打折，别只凭口头承诺做决定。',
-      '你在硬撑一个并不适合你的方向，允许自己调整。',
-      '会有一次挫折，但它暴露的是流程问题，不是你不行。',
-      '别把所有赌注压在一个机会上。',
-      '有人在推卸责任，把记录留好。',
-      '短期内进展会比较慢，耐心比冲劲更重要。',
-      '你的方案还需要再打磨，现在提交容易被退回。',
-      '这个环境的天花板可能比你预期低，值得往外看看。',
-      '会有一段疲惫期，先保证休息，别做重大决定。'
-    ]
-  },
-
-  study: {
-    label:'学业', icon:'📚',
-    keys:['学习','学业','考试','成绩','分数','考研','高考','中考','期末','期中','论文','毕业','答辩','申请','录取','保研','留学','四六级','雅思','托福','证书','考公','公务员','编制','作业','课程','专业','导师','竞赛','成绩单','刷题','复习','补考','挂科','升学','读研'],
-    up:[
-      '会考好。你的基础比你以为的扎实，正常发挥就行。',
-      '这次申请或考试有希望，关键是别在最后阶段松劲。',
-      '你选的方向是对的，学下去会有回报。',
-      '会遇到愿意帮你的老师或同学，主动去问。',
-      '短期突击是有效的，但要抓重点而不是全面铺开。',
-      '成绩会达到预期，甚至略微超出。',
-      '适合挑战一个更难的目标，你现在够得着。',
-      '之前卡住的地方会突然通，别放弃那道题。',
-      '录取或通过的概率偏高，把材料准备扎实。',
-      '你的努力是有效努力，不用怀疑方法。',
-      '会有一次让你信心大增的成绩。',
-      '论文或项目的方向可以定下来了，别再来回换。',
-      '复习节奏调整一下就能提分，重点是错题。',
-      '你担心的那门课，其实没那么难。',
-      '会拿到一个不错的机会（竞赛、交流、实习），接住它。',
-      '坚持下去，这次的结果会证明你的选择没错。'
-    ],
-    rev:[
-      '现在的学习效率不高，换一种方法比硬扛更有效。',
-      '你有点被「假努力」困住了，先停下来复盘。',
-      '这次考试有风险，重点章节还没真正吃透。',
-      '注意力被别的事分散了，先处理掉那个干扰源。',
-      '目标定得太高了，拆成小步更容易推进。',
-      '临场可能出状况，提前做模拟比多背一遍更有用。',
-      '别指望运气，这门课需要实打实的时间投入。',
-      '你选的这个方向可能并不适合你，值得重新想。',
-      '申请结果存在不确定性，同时准备备选路径。',
-      '拖延已经在影响结果了，今天就开始最小的一步。',
-      '会有一次不理想的成绩，但它指出的是薄弱环节。',
-      '你在跟别人比较，这正在消耗你。回到自己的节奏。',
-      '信息收集得不够，做决定前多问几个人。',
-      '短期内压力偏大，注意身体，别熬垮。',
-      '这个任务比你想的花时间，尽早开始。',
-      '结果可能延迟公布，别在等待里空耗。'
-    ]
-  },
-
-  money: {
-    label:'财运', icon:'💰',
-    keys:['钱','财','财运','收入','工资','薪','存款','存钱','攒钱','理财','投资','基金','股票','赚','亏','花销','花费','预算','借钱','还钱','贷款','买房','买车','消费','购物','报销','奖金','红包','负债','信用卡','省钱','价格','费用'],
-    up:[
-      '财运会好转，会有一笔之前没预期的收入。',
-      '现在适合稳健积累，不适合赌一把。',
-      '你之前的一笔投入会开始回本。',
-      '谈钱的时候可以直接一点，这次你占理。',
-      '会有人还你钱，或者给你应得的补偿。',
-      '这笔花销是值得的，它会在以后帮到你。',
-      '适合开始记账或存钱，效果比你想的明显。',
-      '你的报价可以再高一档，别低估自己的价值。',
-      '会有额外进账的机会，但需要你主动接。',
-      '财务状况在往好的方向走，保持现在的节奏。',
-      '借钱给别人这件事可以答应，但要把期限说清楚。',
-      '适合学一个能变现的技能，回报在中长期。',
-      '你担心的那笔钱，最后不会亏太多。',
-      '会有一笔小惊喜：退款、红包或者报销。',
-      '现在开始攒钱，三个月后能看到明显变化。',
-      '这次选择偏保守是对的，稳比快重要。'
-    ],
-    rev:[
-      '最近容易超支，先看一眼账再决定买不买。',
-      '有一笔支出会比预期高，记得留出余地。',
-      '别碰高风险的东西，这次的运气不在赌上。',
-      '有人在钱的事上不够透明，问清楚再合作。',
-      '借出去的钱短期收不回来，量力而行。',
-      '你的收入和付出不太匹配，值得重新谈。',
-      '会有一个看起来很划算的坑，多问一句「凭什么」。',
-      '冲动消费会后悔，先放购物车等一天。',
-      '这笔投资短期会亏，做好心理准备。',
-      '别为了面子花钱，这次的面子不值那个价。',
-      '财务状况需要主动整理，拖着只会更乱。',
-      '有人可能占你便宜，把账目记清楚。',
-      '现在不适合扩张或加杠杆，先守住本金。',
-      '会有一笔意外开销，应急金该留了。',
-      '报酬可能被压价，提前把标准说好。',
-      '你对自己时间的定价太低了。'
-    ]
-  },
-
-  social: {
-    label:'人际', icon:'🤝',
-    keys:['人际','朋友','友情','闺蜜','兄弟','同学','室友','家人','父母','妈妈','爸爸','家庭','亲戚','社交','关系','圈子','被孤立','排挤','误会','矛盾','吵架','冷战','和好','原谅','信任','团队','合作','人缘','同班','友谊'],
-    up:[
-      '这段关系会缓和，主动打个招呼就有转机。',
-      '有人其实站在你这边，只是没说出来。',
-      '适合把心里的话说出来，对方接得住。',
-      '会认识一个聊得来的人。',
-      '家人最终会理解你的选择，给他们一点时间。',
-      '这次的误会能解开，关键是有一个人先开口。',
-      '你在圈子里的口碑比你以为的好。',
-      '适合主动联系一个很久没见的朋友。',
-      '团队里会有人帮你说话。',
-      '这段友谊经得起时间，值得维护。',
-      '你的善意会被记住，只是回报来得慢。',
-      '会有一次让你觉得被真正理解的对话。',
-      '拒绝别人这件事，这次可以坦然一点。',
-      '你担心的那个矛盾，其实没那么严重。',
-      '会有人主动向你示好。',
-      '保持现在的真诚，你的关系网会越来越稳。'
-    ],
-    rev:[
-      '有人在背后说闲话，不用解释太多，时间会证明。',
-      '这段关系里存在不对等，留意自己的感受。',
-      '有人在利用你的好说话，学着设边界。',
-      '这次沟通容易产生误解，重要的事最好当面说。',
-      '你正在勉强自己迎合别人，这会很累。',
-      '家人那边还会有分歧，别指望一次谈成。',
-      '有个朋友的关系在变淡，顺其自然就好。',
-      '别把秘密告诉不够熟的人。',
-      '会听到让你不舒服的话，先别急着反击。',
-      '这段关系需要一次坦白，不然会一直别扭。',
-      '你在意的那个人，最近没把注意力放在你身上。',
-      '团队里可能有小团体，保持中立更安全。',
-      '你付出得太多，而对方已经习惯了。',
-      '这次聚会可能会让你失望，去不去都行。',
-      '有人在拿你们做比较，别接这个茬。',
-      '需要一次断舍离，有些关系该降温了。'
-    ]
-  },
-
-  health: {
-    label:'健康', icon:'🌿',
-    keys:['健康','身体','生病','感冒','发烧','疼','痛','失眠','睡眠','熬夜','累','疲劳','精力','体力','免疫','过敏','胃','头疼','头痛','眼睛','腰','颈椎','减肥','体重','运动','锻炼','作息','压力','焦虑','情绪','心理','医生','体检','医院','恢复','养生'],
-    up:[
-      '身体会好转，规律作息比什么都管用。',
-      '现在开始调整还来得及，效果会很快显现。',
-      '你的疲劳是休息不够，不是生病，睡够就好。',
-      '这次的检查结果会让人安心。',
-      '适合开始一项能坚持的运动，轻量的就行。',
-      '情绪状态在回升，给自己一点肯定。',
-      '会找到适合你的作息节奏。',
-      '你担心的那个症状大概率不严重，但还是去查一下更放心。',
-      '恢复力比你想象的好，别太焦虑。',
-      '饮食调整一下，精力会有明显变化。',
-      '适合早睡，这一条能解决你一半的问题。',
-      '压力源正在减弱，你会慢慢松下来。',
-      '会有人提醒你注意身体，听进去。',
-      '你的自律正在起效，继续保持。',
-      '放松这件事，你做得比你以为的好。',
-      '会有一段状态特别好的时期，抓住它做重要的事。'
-    ],
-    rev:[
-      '身体在给你信号了，别再硬扛。',
-      '熬夜的账迟早要还，这两周尽量早睡。',
-      '建议去做一次检查，别靠猜。',
-      '你的疲劳是累积的，需要真正的休息而不是硬撑。',
-      '情绪正在消耗你的身体，找人聊聊。',
-      '运动计划定得太狠了，容易放弃，先减半。',
-      '最近免疫力偏低，注意保暖和饮食。',
-      '有个小毛病拖得有点久了，去处理掉。',
-      '你在用刷手机和外卖填补疲惫，这解决不了问题。',
-      '压力已经影响到睡眠了，认真对待。',
-      '别靠咖啡因撑，那是在透支。',
-      '这次恢复会比预期慢，给自己更多耐心。',
-      '焦虑放大了你对身体的感受，先放松再看。',
-      '久坐的问题需要现在就改。',
-      '会有一段状态低落的时期，允许自己慢一点。',
-      '别人给你的健康建议，这次值得听。'
-    ]
-  },
-
-  general: {
-    label:'通用', icon:'✨',
-    keys:[],
-    up:[
-      '可以。这件事的阻力比你感觉的小。',
-      '会成，但需要你先迈出第一步。',
-      '时机是好的，别把犹豫当成谨慎。',
-      '你担心的最坏情况，大概率不会发生。',
-      '答案偏向肯定，你的直觉是对的。',
-      '会有贵人或者转机出现，留意身边的人。',
-      '现在适合行动，等待只会让成本变高。',
-      '你能做成这件事，准备已经足够了。',
-      '结果会比你预期的好一些。',
-      '值得一试。即使不完美，收获也是你的。',
-      '会有好消息传来，保持开放。',
-      '你已经在正确的路上，继续走就行。',
-      '可以答应，这次的机会对你有利。',
-      '放下过度思考，答案其实很简单。',
-      '会有一次意外的顺利。',
-      '你比自己以为的更有底气。',
-      '现在开始不算晚。',
-      '这件事的走向是向上的，耐心一点。',
-      '你需要的资源其实已经在你手上了。',
-      '大胆一点，退路没有你想的那么必要。'
-    ],
-    rev:[
-      '现在不是好时机，先缓一缓。',
-      '这件事还有你没看到的信息，别急着定。',
-      '结果可能不如预期，做好备选方案。',
-      '你在勉强一件事，停下来问问自己为什么。',
-      '会有阻力，但不是死路，换个方法再试。',
-      '别把希望全押在这一件事上。',
-      '有人在影响你的判断，听听自己怎么想。',
-      '现在下决定容易后悔，再等一周。',
-      '你忽略了某个明显的信号，回头看看。',
-      '这件事的代价比你想的大，重新算一遍。',
-      '短期内不会有明确答案，先接受这个状态。',
-      '你在重复一个已经试过的做法。',
-      '需要放下点什么，才走得动。',
-      '会有一点失望，但它不影响大局。',
-      '别急着答应，先看清条件。',
-      '你太在意别人的看法了。',
-      '这次靠运气不够，得靠准备。',
-      '有件事你一直没处理，它正在拖住你。',
-      '慢一点。快了容易出错。',
-      '答案偏向「不」，但不是永远不。'
-    ]
-  }
-};
-
-/* =========================================================
-   3. 星座背景（还原参考图的连线星域）
-   ========================================================= */
-(function constellations(){
-  var cv = document.getElementById('sky');
-  var ctx = cv.getContext('2d');
-  var dpr = Math.min(window.devicePixelRatio || 1, 2);
-  var W = 0, H = 0, stars = [], links = [];
-  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  function build(){
-    stars = [];
-    var area = (W / dpr) * (H / dpr);
-    var n = Math.max(26, Math.min(Math.round(area / 11000), 64));
-    for (var i = 0; i < n; i++){
-      stars.push({
-        x: Math.random() * W,
-        y: Math.random() * H,
-        r: (Math.random() * 1.0 + 0.45) * dpr,
-        ph: Math.random() * Math.PI * 2,
-        sp: 0.5 + Math.random() * 1.1
-      });
-    }
-    /* 找出足够近的星，连成星座线 */
-    links = [];
-    var maxD = 132 * dpr;
-    for (var a = 0; a < stars.length; a++){
-      for (var b = a + 1; b < stars.length; b++){
-        var dx = stars[a].x - stars[b].x, dy = stars[a].y - stars[b].y;
-        if (Math.hypot(dx, dy) < maxD) links.push([a, b]);
-      }
-    }
-    if (links.length > 46) links = links.slice(0, 46);
-  }
-
-  function resize(){
-    W = cv.width  = Math.floor(window.innerWidth  * dpr);
-    H = cv.height = Math.floor(window.innerHeight * dpr);
-    cv.style.width  = window.innerWidth + 'px';
-    cv.style.height = window.innerHeight + 'px';
-    build();
-    render(performance.now());
-  }
-
-  function render(t){
-    ctx.clearRect(0, 0, W, H);
-
-    /* 星座连线 */
-    ctx.lineWidth = Math.max(1, 0.6 * dpr);
-    for (var i = 0; i < links.length; i++){
-      var s1 = stars[links[i][0]], s2 = stars[links[i][1]];
-      var d = Math.hypot(s1.x - s2.x, s1.y - s2.y) / (132 * dpr);
-      ctx.strokeStyle = 'rgba(201,192,178,' + (0.075 * (1 - d)).toFixed(3) + ')';
-      ctx.beginPath(); ctx.moveTo(s1.x, s1.y); ctx.lineTo(s2.x, s2.y); ctx.stroke();
-    }
-
-    /* 星点 */
-    for (var j = 0; j < stars.length; j++){
-      var s = stars[j];
-      var tw = reduce ? 0.75 : (0.45 + 0.55 * (0.5 + 0.5 * Math.sin(t / 1400 * s.sp + s.ph)));
-      ctx.fillStyle = 'rgba(255,252,240,' + tw.toFixed(3) + ')';
-      ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2); ctx.fill();
-    }
-  }
-
-  var raf = null, last = 0;
-  function loop(t){
-    raf = requestAnimationFrame(loop);
-    if (t - last < 66) return;          /* 限到约 15fps，省电 */
-    last = t;
-    render(t);
-  }
-
-  window.addEventListener('resize', resize);
-  document.addEventListener('visibilitychange', function(){
-    if (document.hidden){ if (raf) cancelAnimationFrame(raf), raf = null; }
-    else if (!reduce && !raf){ raf = requestAnimationFrame(loop); }
-  });
-
-  resize();
-  if (!reduce) raf = requestAnimationFrame(loop);
-})();
-
-/* =========================================================
-   4. 元素
-   ========================================================= */
 var $ = function(id){ return document.getElementById(id); };
-var card = $('card'), frontInner = $('frontInner'), input = $('q');
-var btnDraw = $('draw'), btnAgain = $('again');
-var topicsEl = $('topics'), topicHint = $('topicHint');
-var questionEl = $('question');
+var screens = { ask: $('screen-ask'), answer: $('screen-answer') };
+var inputAsk = $('q1'), inputAnswer = $('q2');
+
+var DEFAULT_Q = "What's for dinner tonight?";
+var currentQuestion = DEFAULT_Q;
 var currentTopic = 'general';
-var manualTopic = false;
-var busy = false;
 
-/* =========================================================
-   5. 问题 → 话题 识别
-   ========================================================= */
-var TOPIC_ORDER = ['love','career','study','money','social','health','general'];
+/* ---------- 等比缩放，适配任意机型 ---------- */
+function fit(){
+  var cs = getComputedStyle(document.documentElement);
+  var sat = parseFloat(cs.getPropertyValue('--sat')) || 0;
+  var sab = parseFloat(cs.getPropertyValue('--sab')) || 0;
+  var availH = window.innerHeight - sat - sab;
+  var s = Math.min(window.innerWidth / 428, availH / 926);
+  document.documentElement.style.setProperty('--s', s.toFixed(5));
+}
+window.addEventListener('resize', fit);
+window.addEventListener('orientationchange', function(){ setTimeout(fit, 120); });
+fit();
 
-function detectTopic(q){
-  if (!q) return {topic:'general', hits:0};
-  var best = 'general', bestScore = 0, bestHits = 0;
-  for (var i = 0; i < TOPIC_ORDER.length; i++){
-    var key = TOPIC_ORDER[i];
-    if (key === 'general') continue;
-    var words = TOPICS[key].keys, score = 0, hits = 0;
-    for (var j = 0; j < words.length; j++){
-      if (q.indexOf(words[j]) >= 0){ score += words[j].length; hits++; }
-    }
-    if (score > bestScore){ bestScore = score; best = key; bestHits = hits; }
-  }
-  return {topic:best, hits:bestHits};
+/* ---------- 金色高亮：{...} → <em> ---------- */
+function renderAnswer(text){
+  return text
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/\{([^}]+)\}/g, '<em>$1</em>');
 }
 
-/* =========================================================
-   6. 话题 chips
-   ========================================================= */
-function buildChips(){
-  for (var i = 0; i < TOPIC_ORDER.length; i++){
-    (function(key){
-      var t = TOPICS[key];
-      var b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'chip';
-      b.setAttribute('data-topic', key);
-      b.innerHTML = t.icon + ' ' + t.label;
-      b.addEventListener('click', function(){
-        manualTopic = true;
-        setTopic(key, true);
-        if (navigator.vibrate){ try { navigator.vibrate(8); } catch(e){} }
-      });
-      topicsEl.appendChild(b);
-    })(TOPIC_ORDER[i]);
-  }
+/* ---------- 抽答案 ---------- */
+function draw(question){
+  var q = (question || '').trim();
+  currentQuestion = q || DEFAULT_Q;
+
+  var det = detectTopic(currentQuestion);
+  currentTopic = det.topic;
+  $('question').textContent = currentQuestion;
+  $('answer').innerHTML = renderAnswer(pickAnswer(currentTopic, false));
+
+  var card = screens.answer.querySelector('.answer-card');
+  card.style.animation = 'none';
+  void card.offsetWidth;
+  card.style.animation = '';
 }
 
-function setTopic(key, manual){
-  currentTopic = key;
-  var chips = topicsEl.querySelectorAll('.chip');
-  for (var i = 0; i < chips.length; i++){
-    if (chips[i].getAttribute('data-topic') === key) chips[i].classList.add('on');
-    else chips[i].classList.remove('on');
-  }
-  if (manual) topicHint.textContent = '已选：' + TOPICS[key].label + '（点其他可切换）';
+function show(name){
+  for (var k in screens) screens[k].classList.toggle('active', k === name);
+  if (name === 'ask'){ inputAsk.value = ''; }
+  inputAsk.blur(); inputAnswer.blur();
 }
+function go(question){ draw(question); show('answer'); }
 
-/* 输入时：更新顶部问题 + 自动识别话题 */
-function onInput(){
-  var q = input.value.trim();
-  if (q){ questionEl.textContent = q; questionEl.classList.remove('idle'); }
-  else { questionEl.textContent = '在心里默念你的问题'; questionEl.classList.add('idle'); }
+/* ---------- 提交 ---------- */
+$('composer1').addEventListener('submit', function(e){ e.preventDefault(); go(inputAsk.value); });
+$('composer2').addEventListener('submit', function(e){ e.preventDefault(); go(inputAnswer.value || currentQuestion); });
 
-  if (manualTopic) return;
-  var r = detectTopic(q);
-  if (r.hits > 0){
-    setTopic(r.topic, false);
-    topicHint.textContent = '识别到「' + TOPICS[r.topic].label + '」· 不对可手动改';
-  } else {
-    setTopic('general', false);
-    topicHint.textContent = q ? '没识别出话题，用「通用」· 也可手动选'
-                              : '这个问题属于…（自动识别，可手动改）';
-  }
-}
-
-input.addEventListener('input', onInput);
-input.addEventListener('keydown', function(e){
-  if (e.key === 'Enter'){ input.blur(); draw(); }
+[inputAsk, inputAnswer].forEach(function(inp){
+  inp.addEventListener('keydown', function(e){
+    if (e.key === 'Enter'){ e.preventDefault(); inp.blur(); go(inp.value); }
+  });
 });
 
-/* =========================================================
-   7. 抽牌
-   ========================================================= */
-function pick(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
+/* ---------- View similar case：再抽一张 ---------- */
+$('similar').addEventListener('click', function(){
+  $('answer').innerHTML = renderAnswer(pickAnswer(currentTopic, false));
+  var card = screens.answer.querySelector('.answer-card');
+  card.style.animation = 'none'; void card.offsetWidth; card.style.animation = '';
+  if (navigator.vibrate){ try { navigator.vibrate(10); } catch(e){} }
+});
 
-function draw(){
-  if (busy) return;
-  busy = true;
-  btnDraw.disabled = true;
+/* ---------- 主页按钮 = 回到提问页 ---------- */
+$('home1').addEventListener('click', function(){ inputAsk.value = ''; show('ask'); });
+$('home2').addEventListener('click', function(){ show('ask'); });
 
-  var q = input.value.trim();
+/* ---------- 键盘图标 = 聚焦输入 ---------- */
+$('kbd1').addEventListener('click', function(){ inputAsk.focus(); });
+$('kbd2').addEventListener('click', function(){ inputAnswer.focus(); });
 
-  if (!manualTopic){
-    var det = detectTopic(q);
-    setTopic(det.topic, false);
-    if (det.hits > 0) topicHint.textContent = '识别到「' + TOPICS[det.topic].label + '」· 不对可手动改';
-  }
-
-  var topic = TOPICS[currentTopic];
-  var c = DECK[Math.floor(Math.random() * DECK.length)];
-  var reversed = Math.random() < REVERSED_RATE;
-  var bank = reversed ? topic.rev : topic.up;
-  var answer = pick(bank);
-
-  card.classList.remove('flipped');
-  card.classList.remove('is-rev');
-  frontInner.classList.remove('rev');
-  card.classList.add('shuffling');
-  if (navigator.vibrate){ try { navigator.vibrate(12); } catch(e){} }
-
-  setTimeout(function(){
-    /* 牌面：卡名 + 正逆位 + 本次答案 */
-    $('cardOrient').textContent = reversed ? '逆位' : '正位';
-    $('cardOrient').className = 'card-orient' + (reversed ? ' rev' : '');
-    $('cardName').textContent = c.name + ' · ' + c.en;
-    $('cardAnswer').textContent = answer;
-    $('cardTopic').textContent = topic.icon + ' ' + topic.label;
-    if (reversed){
-      frontInner.classList.add('rev');
-      card.classList.add('is-rev');
-    }
-
-    /* 牌外：牌意 + 来源 */
-    $('caption').innerHTML = '<span class="k">牌意</span> · ' + (reversed ? c.rev : c.up);
-    $('meta').textContent = '从「' + topic.label + ' · ' + (reversed ? '逆位' : '正位') +
-                            '」答案库的 ' + bank.length + ' 条中随机抽取';
-
-    btnAgain.textContent = '再 抽 一 张';
-    card.classList.remove('shuffling');
-    card.classList.add('flipped');
-
-    setTimeout(function(){
-      busy = false;
-      btnDraw.disabled = false;
-    }, 620);
-  }, 700);
-}
-
-btnDraw.addEventListener('click', draw);
-btnAgain.addEventListener('click', draw);
-
-/* =========================================================
-   8. 分享 / 复制链接
-   ========================================================= */
-$('share').addEventListener('click', function(){
+/* ---------- 分享 ---------- */
+function share(){
   var url = location.href;
   if (navigator.share){
-    navigator.share({ title:'塔罗占卜 · 抽一张牌', text:'写下你的问题，抽一张牌。', url:url })
-      .catch(function(){});
-    return;
+    navigator.share({ title:'Ask Oracle', text: currentQuestion, url: url }).catch(function(){});
+  } else if (navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(url).catch(function(){});
   }
-  if (navigator.clipboard && navigator.clipboard.writeText){
-    navigator.clipboard.writeText(url).then(function(){ toast('链接已复制'); },
-                                            function(){ toast(url); });
-  } else { toast(url); }
-});
-
-var toastTimer = null;
-function toast(msg){
-  var el = $('toast');
-  el.textContent = msg;
-  el.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(function(){ el.classList.remove('show'); }, 1800);
 }
+$('share1').addEventListener('click', share);
+$('share2').addEventListener('click', share);
 
-/* =========================================================
-   9. PWA：离线缓存 + 安装到主屏幕
-   ========================================================= */
+/* ---------- 语音输入（不支持时退回键盘）---------- */
+var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+function bindMic(micId, input){
+  var btn = $(micId), rec = null;
+  if (SR){
+    rec = new SR();
+    rec.lang = 'en-US'; rec.interimResults = false; rec.maxAlternatives = 1;
+    rec.onresult = function(e){
+      btn.classList.remove('listening');
+      go(e.results[0][0].transcript);
+    };
+    rec.onerror = function(){ btn.classList.remove('listening'); };
+    rec.onend   = function(){ btn.classList.remove('listening'); };
+  }
+  btn.addEventListener('click', function(){
+    if (!rec){ input.focus(); return; }
+    try { btn.classList.add('listening'); rec.start(); }
+    catch (e){ btn.classList.remove('listening'); input.focus(); }
+  });
+}
+bindMic('mic1', inputAsk);
+bindMic('mic2', inputAnswer);
+
+/* ---------- PWA ---------- */
 (function pwa(){
   if ('serviceWorker' in navigator){
     window.addEventListener('load', function(){
       navigator.serviceWorker.register('sw.js').catch(function(){});
     });
   }
-
-  var banner = $('install'), txt = $('installTxt');
-  var btn = $('installBtn'), x = $('installX');
-
   var standalone = (window.navigator.standalone === true) ||
                    (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
   if (standalone) return;
-  try { if (localStorage.getItem('tarot_no_install')) return; } catch (e) {}
+  try { if (localStorage.getItem('oracle_no_install')) return; } catch (e) {}
 
+  var banner = $('install'), txt = $('installTxt'), btn = $('installBtn');
   var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent || '');
   var deferred = null;
 
-  function show(msg, withBtn){
-    txt.textContent = msg;
-    if (withBtn) btn.hidden = false;
-    banner.hidden = false;
-  }
-  function close(){
+  $('installX').addEventListener('click', function(){
     banner.hidden = true;
-    try { localStorage.setItem('tarot_no_install', '1'); } catch (e) {}
-  }
-  x.addEventListener('click', close);
-
-  window.addEventListener('beforeinstallprompt', function(e){
-    e.preventDefault();
-    deferred = e;
-    show('装到主屏幕，打开就是全屏 App，断网也能用。', true);
+    try { localStorage.setItem('oracle_no_install','1'); } catch(e){}
   });
-
+  window.addEventListener('beforeinstallprompt', function(e){
+    e.preventDefault(); deferred = e; btn.hidden = false;
+    txt.textContent = 'Install to your home screen for a full-screen app that works offline.';
+    banner.hidden = false;
+  });
   btn.addEventListener('click', function(){
     if (!deferred) return;
     deferred.prompt();
-    deferred.userChoice.then(function(){
-      deferred = null; btn.hidden = true; close();
-    });
+    deferred.userChoice.then(function(){ banner.hidden = true; deferred = null; });
   });
-
   if (isIOS){
     setTimeout(function(){
       if (!banner.hidden) return;
-      show('想当 App 用？点底部「分享」→「添加到主屏幕」，就有独立图标和全屏界面。', false);
-    }, 2500);
+      txt.textContent = 'Tap Share, then "Add to Home Screen" to use this as a full-screen app.';
+      banner.hidden = false;
+    }, 7000);
   }
 })();
 
-/* =========================================================
-   10. 启动
-   ========================================================= */
-buildChips();
-setTopic('general', false);
-onInput();
+show('ask');
 </script>
 </body>
 </html>

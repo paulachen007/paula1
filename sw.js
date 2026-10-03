@@ -1,20 +1,29 @@
-/* 塔罗占卜 · Service Worker
-   作用：把页面和图标缓存到本地，断网也能打开，装到主屏幕后秒开。 */
+/* Ask Oracle · Service Worker
+   把页面、字体和图片缓存到本地，断网也能打开。 */
 
-var CACHE = 'tarot-v3';
+var CACHE = 'oracle-v1';
 
 var ASSETS = [
   './',
   './index.html',
+  './answers.js',
   './manifest.json',
+  './assets/bg-ask.webp',
+  './assets/bg-answer.webp',
+  './assets/person-ask.webp',
+  './assets/person-answer.webp',
+  './assets/icon-home.svg',
+  './assets/icon-share.svg',
+  './assets/icon-keyboard.svg',
+  './fonts/almendra-400.woff2',
+  './fonts/almendra-700.woff2',
+  './fonts/almendra-400-italic.woff2',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-maskable-512.png',
-  './icons/apple-touch-icon-180.png',
-  './icons/favicon-64.png'
+  './icons/apple-touch-icon-180.png'
 ];
 
-/* 安装：预缓存全部资源 */
 self.addEventListener('install', function(e){
   e.waitUntil(
     caches.open(CACHE)
@@ -23,7 +32,6 @@ self.addEventListener('install', function(e){
   );
 });
 
-/* 激活：清掉旧版本缓存 */
 self.addEventListener('activate', function(e){
   e.waitUntil(
     caches.keys().then(function(keys){
@@ -34,20 +42,13 @@ self.addEventListener('activate', function(e){
   );
 });
 
-/* 请求拦截 */
 self.addEventListener('fetch', function(e){
   var req = e.request;
   if (req.method !== 'GET') return;
-
-  /* 页面导航：优先走网络（拿最新版），失败就回退到缓存的首页 */
   if (req.mode === 'navigate'){
-    e.respondWith(
-      fetch(req).catch(function(){ return caches.match('./index.html'); })
-    );
+    e.respondWith(fetch(req).catch(function(){ return caches.match('./index.html'); }));
     return;
   }
-
-  /* 静态资源：缓存优先 */
   e.respondWith(
     caches.match(req).then(function(hit){
       if (hit) return hit;
