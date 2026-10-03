@@ -1,7 +1,7 @@
 /* Ask Oracle · Service Worker
    把页面、字体和图片缓存到本地，断网也能打开。 */
 
-var CACHE = 'oracle-v2';
+var CACHE = 'oracle-v3';
 
 var ASSETS = [
   './',
@@ -46,7 +46,14 @@ self.addEventListener('fetch', function(e){
   var req = e.request;
   if (req.method !== 'GET') return;
   if (req.mode === 'navigate'){
-    e.respondWith(fetch(req).catch(function(){ return caches.match('./index.html'); }));
+    /* 网络优先拿最新版；顺便把最新版写回缓存，供断网时使用 */
+    e.respondWith(
+      fetch(req).then(function(res){
+        var copy = res.clone();
+        caches.open(CACHE).then(function(c){ c.put('./index.html', copy); });
+        return res;
+      }).catch(function(){ return caches.match('./index.html'); })
+    );
     return;
   }
   e.respondWith(
