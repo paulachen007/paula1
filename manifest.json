@@ -1,8 +1,8 @@
 {
-  "name": "Ask Oracle",
-  "short_name": "Oracle",
-  "description": "Ask a question and receive an answer.",
-  "lang": "en",
+  "name": "占卜问答",
+  "short_name": "占卜",
+  "description": "写下你的问题，得到针对这个问题的回答。",
+  "lang": "zh-CN",
   "dir": "ltr",
   "start_url": "./",
   "scope": "./",

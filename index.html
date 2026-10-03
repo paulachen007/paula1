@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#000000">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Oracle">
+<meta name="apple-mobile-web-app-title" content="占卜问答">
 <link rel="apple-touch-startup-image" href="assets/splash/430x932@3x.jpg" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)">
 <link rel="apple-touch-startup-image" href="assets/splash/393x852@3x.jpg" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)">
 <link rel="apple-touch-startup-image" href="assets/splash/390x844@3x.jpg" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)">
@@ -16,8 +16,11 @@
 <link rel="apple-touch-startup-image" href="assets/splash/414x896@2x.jpg" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2)">
 <link rel="apple-touch-startup-image" href="assets/splash/375x667@2x.jpg" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)">
 <link rel="apple-touch-startup-image" href="assets/splash/414x736@3x.jpg" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3)">
-<meta name="description" content="Ask a question and receive an answer.">
-<title>Ask Oracle</title>
+<meta name="description" content="写下你的问题，得到针对这个问题的回答。">
+<meta property="og:title" content="占卜问答">
+<meta property="og:description" content="写下你的问题，得到针对这个问题的回答。">
+<meta property="og:type" content="website">
+<title>占卜问答</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" sizes="64x64" href="icons/favicon-64.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon-180.png">
@@ -119,8 +122,8 @@ img{-webkit-user-drag:none;user-drag:none}
 /* ---------- 输入页文字 ---------- */
 .greeting{
   position:absolute;left:38px;top:577px;width:310px;
-  font-size:36px;font-weight:700;line-height:46.656px;
-  color:var(--ink);letter-spacing:.1px;
+  font-size:30px;font-weight:700;line-height:46.656px;
+  color:var(--ink);letter-spacing:.02em;
 }
 .subtitle{
   position:absolute;left:38px;top:718px;width:326px;
@@ -184,7 +187,7 @@ img{-webkit-user-drag:none;user-drag:none}
 /* ---------- 解答页 ---------- */
 .question{
   position:absolute;left:34px;top:110px;width:360px;
-  font-size:24px;font-weight:700;line-height:31.104px;
+  font-size:21px;font-weight:700;line-height:1.5;letter-spacing:.03em;
   color:var(--ink-2);text-align:center;
 }
 .answer-card{
@@ -205,9 +208,11 @@ img{-webkit-user-drag:none;user-drag:none}
   line-break:strict;
 }
 .answer-card em{font-style:normal;color:var(--gold)}
-/* 中文：宋体渲染，字号与行距单独调整 */
-#answer.zh{font-size:18.5px;line-height:1.82;letter-spacing:.01em}
-.question.zh{font-size:21px;line-height:1.5;letter-spacing:.03em}
+/* 中文排版为默认（宋体 + 略小字号、较大行距）；
+   纯拉丁内容时加 .latin 切回设计稿的字号与行距 */
+#answer{font-size:18.5px;line-height:1.82;letter-spacing:.01em}
+#answer.latin{font-size:24px;line-height:31.104px;letter-spacing:0}
+.question.latin{font-size:24px;line-height:31.104px;letter-spacing:0}
 /* ---------- 抽答案动效 ----------
    卡片绕竖轴转 3 整圈（1080°）→ 停住 → 答案文字浮现。
    转的过程中答案是隐藏的，所以看不到字在转。
@@ -294,22 +299,22 @@ img{-webkit-user-drag:none;user-drag:none}
     <img class="person" src="assets/person-ask.webp" alt="">
     <div class="scrim"></div>
 
-    <button class="glass-btn btn-home"  id="home1" aria-label="Home">
+    <button class="glass-btn btn-home"  id="home1" aria-label="主页">
       <img src="assets/icon-home.svg" alt="">
     </button>
-    <button class="glass-btn share btn-share" id="share1" aria-label="Share">
+    <button class="glass-btn share btn-share" id="share1" aria-label="分享">
       <img src="assets/icon-share.svg" alt="">
     </button>
 
-    <div class="greeting">Hello Crystal.Yao,<br>What would you like to ask?</div>
-    <div class="subtitle">My Mercury Retrograde Status | Recent Career Horoscope</div>
+    <div class="greeting">你好，Crystal.Yao<br>你想问什么？</div>
+    <div class="subtitle">我的水逆状态 | 近期事业运势</div>
 
     <form class="composer" id="composer1" autocomplete="off">
-      <button type="button" class="mic" id="mic1" aria-label="Speak">
+      <button type="button" class="mic" id="mic1" aria-label="语音输入">
         <svg viewBox="0 0 24 24"><path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v5a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-4 4.9V19h2.5a.9.9 0 1 1 0 1.8h-7a.9.9 0 1 1 0-1.8H11v-3.1A5 5 0 0 1 7 11a.9.9 0 1 1 1.8 0 3.2 3.2 0 0 0 6.4 0 .9.9 0 1 1 1.8 0z"/></svg>
       </button>
-      <input id="q1" type="text" placeholder="Press to start speaking..." aria-label="Your question">
-      <button type="button" class="act" id="act1" aria-label="Type or send">
+      <input id="q1" type="text" placeholder="说说你想问什么…" aria-label="你的问题">
+      <button type="button" class="act" id="act1" aria-label="输入或发送">
         <img class="kbd-ico" src="assets/icon-keyboard.svg" alt="">
         <svg class="send-ico" viewBox="0 0 24 24" aria-hidden="true">
           <path d="M4 12h13M11 5.5l6.5 6.5-6.5 6.5" fill="none" stroke="#E3E1DB"
@@ -325,27 +330,27 @@ img{-webkit-user-drag:none;user-drag:none}
     <img class="bg"     src="assets/bg-answer.webp"     alt="">
     <img class="person" src="assets/person-answer.webp" alt="">
 
-    <button class="glass-btn btn-home"  id="home2" aria-label="Home">
+    <button class="glass-btn btn-home"  id="home2" aria-label="主页">
       <img src="assets/icon-home.svg" alt="">
     </button>
-    <button class="glass-btn share btn-share" id="share2" aria-label="Share">
+    <button class="glass-btn share btn-share" id="share2" aria-label="分享">
       <img src="assets/icon-share.svg" alt="">
     </button>
 
-    <div class="question" id="question">What's for dinner tonight?</div>
+    <div class="question" id="question">今晚吃什么？</div>
 
     <div class="answer-card">
       <p id="answer"></p>
     </div>
 
-    <button class="btn-similar" id="similar">View similar case</button>
+    <button class="btn-similar" id="similar">再抽一个答案</button>
 
     <form class="composer" id="composer2" autocomplete="off">
-      <button type="button" class="mic" id="mic2" aria-label="Speak">
+      <button type="button" class="mic" id="mic2" aria-label="语音输入">
         <svg viewBox="0 0 24 24"><path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v5a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-4 4.9V19h2.5a.9.9 0 1 1 0 1.8h-7a.9.9 0 1 1 0-1.8H11v-3.1A5 5 0 0 1 7 11a.9.9 0 1 1 1.8 0 3.2 3.2 0 0 0 6.4 0 .9.9 0 1 1 1.8 0z"/></svg>
       </button>
-      <input id="q2" type="text" placeholder="Press to start speaking..." aria-label="Your question">
-      <button type="button" class="act" id="act2" aria-label="Type or send">
+      <input id="q2" type="text" placeholder="说说你想问什么…" aria-label="你的问题">
+      <button type="button" class="act" id="act2" aria-label="输入或发送">
         <img class="kbd-ico" src="assets/icon-keyboard.svg" alt="">
         <svg class="send-ico" viewBox="0 0 24 24" aria-hidden="true">
           <path d="M4 12h13M11 5.5l6.5 6.5-6.5 6.5" fill="none" stroke="#E3E1DB"
@@ -362,8 +367,8 @@ img{-webkit-user-drag:none;user-drag:none}
 
 <div class="install" id="install" hidden>
   <span id="installTxt"></span>
-  <button id="installBtn" hidden>Install</button>
-  <button class="x" id="installX" aria-label="Close">✕</button>
+  <button id="installBtn" hidden>安装</button>
+  <button class="x" id="installX" aria-label="关闭提示">✕</button>
 </div>
 
 <script src="answers.js"></script>
@@ -372,10 +377,9 @@ var $ = function(id){ return document.getElementById(id); };
 var screens = { ask: $('screen-ask'), answer: $('screen-answer') };
 var inputAsk = $('q1'), inputAnswer = $('q2');
 
-var DEFAULT_Q = "What's for dinner tonight?";
+var DEFAULT_Q = '今晚吃什么？';
 var currentQuestion = DEFAULT_Q;
 var currentTopic = 'general';
-var currentLang = 'en';   /* 问题用什么语言问，就用什么语言答 */
 
 /* ---------- 等比缩放，适配任意机型 ---------- */
 var typing = false;   /* 输入法弹起期间冻结缩放，否则页面会跳 */
@@ -408,21 +412,19 @@ function renderAnswer(text){
   var safe = text
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 
-  /* 英文答案在数据里用 {…} 手工标记了高亮 */
+  /* 数据里可用 {…} 手工标记高亮 */
   if (/\{[^}]+\}/.test(safe)) return safe.replace(/\{([^}]+)\}/g, '<em>$1</em>');
 
-  /* 中文答案没有手工标记：自动高亮开头那句短判断（对应设计稿的金色强调） */
-  if (hasCJK(safe)){
-    var m = safe.match(/^([^。，！？；、]{1,9})[。，！？；]/);
-    if (m) return '<em>' + m[1] + '</em>' + safe.slice(m[1].length);
-  }
+  /* 没标记时：自动高亮开头那句短判断（对应设计稿的金色强调） */
+  var m = safe.match(/^([^。，！？；、]{1,9})[。，！？；]/);
+  if (m) return '<em>' + m[1] + '</em>' + safe.slice(m[1].length);
   return safe;
 }
 
-/* 写入答案，并按语言切换排版 */
+/* 写入答案；含中文用宋体排版，纯拉丁切回设计稿字号 */
 function setAnswer(text){
   var el = $('answer');
-  el.className = hasCJK(text) ? 'zh' : '';
+  el.className = hasCJK(text) ? '' : 'latin';
   el.innerHTML = renderAnswer(text);
 }
 
@@ -442,16 +444,14 @@ function draw(question){
   var q = (question || '').trim();
   currentQuestion = q || DEFAULT_Q;
 
-  currentLang = hasCJK(currentQuestion) ? 'zh' : 'en';
-
   var det = detectTopic(currentQuestion);
   currentTopic = det.topic;
 
   var qEl = $('question');
   qEl.textContent = currentQuestion;
-  qEl.classList.toggle('zh', currentLang === 'zh');
+  qEl.classList.toggle('latin', !hasCJK(currentQuestion));
 
-  setAnswer(pickAnswer(currentTopic, currentLang));
+  setAnswer(pickAnswer(currentTopic));
 
   restartReveal();
 }
@@ -473,9 +473,9 @@ $('composer2').addEventListener('submit', function(e){ e.preventDefault(); go(in
   });
 });
 
-/* ---------- View similar case：再抽一张 ---------- */
+/* ---------- 「再抽一个答案」按钮 ---------- */
 $('similar').addEventListener('click', function(){
-  setAnswer(pickAnswer(currentTopic, currentLang));
+  setAnswer(pickAnswer(currentTopic));
   restartReveal();
   if (navigator.vibrate){ try { navigator.vibrate(12); } catch(e){} }
 });
@@ -498,7 +498,7 @@ function toast(msg){
 function share(){
   var url = location.href;
   if (navigator.share){
-    navigator.share({ title:'Ask Oracle', text: currentQuestion, url: url }).catch(function(){});
+    navigator.share({ title:'占卜问答', text: currentQuestion, url: url }).catch(function(){});
   } else if (navigator.clipboard && navigator.clipboard.writeText){
     navigator.clipboard.writeText(url).catch(function(){});
   }
@@ -540,7 +540,7 @@ function bindComposer(formId, actId, micId, input){
   var rec = null;
   if (SR){
     rec = new SR();
-    rec.lang = 'en-US';
+    rec.lang = 'zh-CN';
     rec.interimResults = false;
     rec.maxAlternatives = 1;
     rec.onresult = function(e){
@@ -551,23 +551,23 @@ function bindComposer(formId, actId, micId, input){
     rec.onerror = function(ev){
       mic.classList.remove('listening');
       if (ev && ev.error === 'not-allowed')
-        toast('Microphone access was denied — tap the field to type instead.');
+        toast('麦克风权限被拒绝了，点输入框直接输入吧。');
       else
-        toast('Did not catch that — tap the field to type instead.');
+        toast('没听清，点输入框直接输入吧。');
     };
     rec.onend = function(){ mic.classList.remove('listening'); };
   }
   mic.addEventListener('click', function(e){
     e.preventDefault();
     if (!rec){
-      toast('Voice input is not supported here — tap the field and type.');
+      toast('这个浏览器不支持语音输入，点输入框直接输入吧。');
       input.focus();
       return;
     }
     try {
       mic.classList.add('listening');
       rec.start();
-      toast('Listening… say your question.');
+      toast('正在听…说出你的问题。');
     } catch (err) {
       mic.classList.remove('listening');
       input.focus();
@@ -600,7 +600,7 @@ bindComposer('composer2', 'act2', 'mic2', inputAnswer);
   });
   window.addEventListener('beforeinstallprompt', function(e){
     e.preventDefault(); deferred = e; btn.hidden = false;
-    txt.textContent = 'Install to your home screen for a full-screen app that works offline.';
+    txt.textContent = '添加到主屏幕，全屏使用，断网也能打开。';
     banner.hidden = false;
   });
   btn.addEventListener('click', function(){
@@ -611,7 +611,7 @@ bindComposer('composer2', 'act2', 'mic2', inputAnswer);
   if (isIOS){
     setTimeout(function(){
       if (!banner.hidden) return;
-      txt.textContent = 'Tap Share, then "Add to Home Screen" to use this as a full-screen app.';
+      txt.textContent = '点底部「分享」→「添加到主屏幕」，就能像 App 一样全屏使用。';
       banner.hidden = false;
     }, 7000);
   }
