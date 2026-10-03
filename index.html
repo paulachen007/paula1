@@ -45,7 +45,7 @@
 html,body{height:100%;overscroll-behavior:none}
 body{
   margin:0;background:#000;color:var(--ink);
-  font-family:'Almendra',Georgia,'Times New Roman',serif;
+  font-family:'Almendra',"Songti SC","STSong","Noto Serif SC","Source Han Serif SC",Georgia,serif;
   /* 高度由 JS 写入真实的「可见视口高度」，确保底部输入条不被 Safari 工具栏盖住 */
   position:fixed;left:0;right:0;top:0;height:var(--vh,100%);
   overflow:hidden;
@@ -200,8 +200,14 @@ img{-webkit-user-drag:none;user-drag:none}
   margin:0;
   font-size:24px;font-weight:400;line-height:31.104px;
   color:var(--ink-2);
+  text-wrap:pretty;              /* 避免中文最后一行只剩一两个字（支持的浏览器生效） */
+  word-break:normal;
+  line-break:strict;
 }
 .answer-card em{font-style:normal;color:var(--gold)}
+/* 中文：宋体渲染，字号与行距单独调整 */
+#answer.zh{font-size:18.5px;line-height:1.82;letter-spacing:.01em}
+.question.zh{font-size:21px;line-height:1.5;letter-spacing:.03em}
 #screen-answer.active .answer-card{
   animation:cardIn .7s cubic-bezier(.2,.8,.25,1) both;
 }
@@ -342,6 +348,7 @@ var inputAsk = $('q1'), inputAnswer = $('q2');
 var DEFAULT_Q = "What's for dinner tonight?";
 var currentQuestion = DEFAULT_Q;
 var currentTopic = 'general';
+var currentLang = 'en';   /* 问题用什么语言问，就用什么语言答 */
 
 /* ---------- 等比缩放，适配任意机型 ---------- */
 var typing = false;   /* 输入法弹起期间冻结缩放，否则页面会跳 */
@@ -371,9 +378,25 @@ fit();
 
 /* ---------- 金色高亮：{...} → <em> ---------- */
 function renderAnswer(text){
-  return text
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-    .replace(/\{([^}]+)\}/g, '<em>$1</em>');
+  var safe = text
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+  /* 英文答案在数据里用 {…} 手工标记了高亮 */
+  if (/\{[^}]+\}/.test(safe)) return safe.replace(/\{([^}]+)\}/g, '<em>$1</em>');
+
+  /* 中文答案没有手工标记：自动高亮开头那句短判断（对应设计稿的金色强调） */
+  if (hasCJK(safe)){
+    var m = safe.match(/^([^。，！？；、]{1,9})[。，！？；]/);
+    if (m) return '<em>' + m[1] + '</em>' + safe.slice(m[1].length);
+  }
+  return safe;
+}
+
+/* 写入答案，并按语言切换排版 */
+function setAnswer(text){
+  var el = $('answer');
+  el.className = hasCJK(text) ? 'zh' : '';
+  el.innerHTML = renderAnswer(text);
 }
 
 /* ---------- 抽答案 ---------- */
@@ -381,10 +404,16 @@ function draw(question){
   var q = (question || '').trim();
   currentQuestion = q || DEFAULT_Q;
 
+  currentLang = hasCJK(currentQuestion) ? 'zh' : 'en';
+
   var det = detectTopic(currentQuestion);
   currentTopic = det.topic;
-  $('question').textContent = currentQuestion;
-  $('answer').innerHTML = renderAnswer(pickAnswer(currentTopic, false));
+
+  var qEl = $('question');
+  qEl.textContent = currentQuestion;
+  qEl.classList.toggle('zh', currentLang === 'zh');
+
+  setAnswer(pickAnswer(currentTopic, currentLang));
 
   var card = screens.answer.querySelector('.answer-card');
   card.style.animation = 'none';
@@ -411,7 +440,7 @@ $('composer2').addEventListener('submit', function(e){ e.preventDefault(); go(in
 
 /* ---------- View similar case：再抽一张 ---------- */
 $('similar').addEventListener('click', function(){
-  $('answer').innerHTML = renderAnswer(pickAnswer(currentTopic, false));
+  setAnswer(pickAnswer(currentTopic, currentLang));
   var card = screens.answer.querySelector('.answer-card');
   card.style.animation = 'none'; void card.offsetWidth; card.style.animation = '';
   if (navigator.vibrate){ try { navigator.vibrate(10); } catch(e){} }
