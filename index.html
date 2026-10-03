@@ -46,7 +46,8 @@ html,body{height:100%;overscroll-behavior:none}
 body{
   margin:0;background:#000;color:var(--ink);
   font-family:'Almendra',Georgia,'Times New Roman',serif;
-  position:fixed;inset:0;                 /* 彻底禁掉 iOS 的下拉回弹 */
+  /* 高度由 JS 写入真实的「可见视口高度」，确保底部输入条不被 Safari 工具栏盖住 */
+  position:fixed;left:0;right:0;top:0;height:var(--vh,100%);
   overflow:hidden;
   display:grid;place-items:center;
   padding:var(--sat) 0 var(--sab);
@@ -58,14 +59,21 @@ body{
 input,textarea{-webkit-user-select:text;user-select:text}
 img{-webkit-user-drag:none;user-drag:none}
 
-/* ---------- 舞台：按设计稿 428×926 等比缩放 ---------- */
-.stage{
+/* ---------- 舞台：按设计稿 428×926 等比缩放 ----------
+   transform:scale() 不改变布局尺寸，所以必须用一个「尺寸=缩放后尺寸」的
+   frame 来参与居中，否则缩放后位置会跑偏、底部输入条会被裁掉。 */
+.frame{
   position:relative;
-  width:428px;height:926px;flex:none;
-  transform:scale(var(--s, 1));
-  transform-origin:center center;
+  width:calc(428px * var(--s, 1));
+  height:calc(926px * var(--s, 1));
   overflow:hidden;
   background:#000;
+}
+.stage{
+  position:absolute;left:0;top:0;
+  width:428px;height:926px;
+  transform:scale(var(--s, 1));
+  transform-origin:top left;
 }
 .screen{
   position:absolute;inset:0;
@@ -150,11 +158,28 @@ img{-webkit-user-drag:none;user-drag:none}
   padding:0;
 }
 .composer input::placeholder{color:var(--ink);opacity:.92}
-.kbd{
+.act{
   flex:0 0 24px;width:24px;height:24px;border:none;background:transparent;
-  padding:0;cursor:pointer;
+  padding:0;cursor:pointer;display:grid;place-items:center;
 }
-.kbd img{width:24px;height:24px;display:block}
+.act img,.act svg{width:24px;height:24px;display:block}
+.act .send-ico{display:none}
+.composer.has-text .act .kbd-ico{display:none}
+.composer.has-text .act .send-ico{display:block}
+.composer.has-text{border-color:#E3E1DB}
+
+/* ---------- 轻提示 ---------- */
+.toast{
+  position:fixed;left:50%;bottom:calc(var(--sab) + 96px);
+  transform:translateX(-50%) translateY(12px);
+  z-index:30;max-width:86%;
+  padding:10px 18px;border-radius:999px;
+  background:rgba(227,225,219,.96);color:#1E1B16;
+  font-size:13px;line-height:1.5;text-align:center;
+  opacity:0;pointer-events:none;
+  transition:opacity .25s, transform .25s;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
 /* ---------- 解答页 ---------- */
 .question{
@@ -203,7 +228,7 @@ img{-webkit-user-drag:none;user-drag:none}
 /* ---------- 安装提示（仅 iOS，延迟出现，可关闭）---------- */
 .install{
   position:fixed;left:16px;right:16px;
-  bottom:calc(var(--sab) + 16px);z-index:20;
+  top:calc(var(--sat) + 12px);z-index:20;
   display:flex;align-items:center;gap:10px;
   padding:12px 10px 12px 15px;border-radius:14px;
   border:1px solid rgba(227,225,219,.28);
@@ -227,6 +252,7 @@ img{-webkit-user-drag:none;user-drag:none}
 </head>
 <body>
 
+<div class="frame" id="frame">
 <div class="stage" id="stage">
 
   <!-- ==================== 输入页 ==================== -->
@@ -250,8 +276,12 @@ img{-webkit-user-drag:none;user-drag:none}
         <svg viewBox="0 0 24 24"><path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v5a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-4 4.9V19h2.5a.9.9 0 1 1 0 1.8h-7a.9.9 0 1 1 0-1.8H11v-3.1A5 5 0 0 1 7 11a.9.9 0 1 1 1.8 0 3.2 3.2 0 0 0 6.4 0 .9.9 0 1 1 1.8 0z"/></svg>
       </button>
       <input id="q1" type="text" placeholder="Press to start speaking..." aria-label="Your question">
-      <button type="button" class="kbd" id="kbd1" aria-label="Keyboard">
-        <img src="assets/icon-keyboard.svg" alt="">
+      <button type="button" class="act" id="act1" aria-label="Type or send">
+        <img class="kbd-ico" src="assets/icon-keyboard.svg" alt="">
+        <svg class="send-ico" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 12h13M11 5.5l6.5 6.5-6.5 6.5" fill="none" stroke="#E3E1DB"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
       </button>
     </form>
   </section>
@@ -282,13 +312,20 @@ img{-webkit-user-drag:none;user-drag:none}
         <svg viewBox="0 0 24 24"><path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v5a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-4 4.9V19h2.5a.9.9 0 1 1 0 1.8h-7a.9.9 0 1 1 0-1.8H11v-3.1A5 5 0 0 1 7 11a.9.9 0 1 1 1.8 0 3.2 3.2 0 0 0 6.4 0 .9.9 0 1 1 1.8 0z"/></svg>
       </button>
       <input id="q2" type="text" placeholder="Press to start speaking..." aria-label="Your question">
-      <button type="button" class="kbd" id="kbd2" aria-label="Keyboard">
-        <img src="assets/icon-keyboard.svg" alt="">
+      <button type="button" class="act" id="act2" aria-label="Type or send">
+        <img class="kbd-ico" src="assets/icon-keyboard.svg" alt="">
+        <svg class="send-ico" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 12h13M11 5.5l6.5 6.5-6.5 6.5" fill="none" stroke="#E3E1DB"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
       </button>
     </form>
   </section>
 
 </div>
+</div>
+
+<div class="toast" id="toast"></div>
 
 <div class="install" id="install" hidden>
   <span id="installTxt"></span>
@@ -307,16 +344,29 @@ var currentQuestion = DEFAULT_Q;
 var currentTopic = 'general';
 
 /* ---------- 等比缩放，适配任意机型 ---------- */
+var typing = false;   /* 输入法弹起期间冻结缩放，否则页面会跳 */
 function fit(){
-  var cs = getComputedStyle(document.documentElement);
+  if (typing) return;
+  var root = document.documentElement;
+
+  /* iOS 上 innerHeight / clientHeight / visualViewport.height 会不一致，
+     取三者「最小」才能保证舞台在最短的那个解释下也完整可见（否则底部输入条会被裁掉）*/
+  var cands = [window.innerHeight, root.clientHeight];
+  if (window.visualViewport) cands.push(window.visualViewport.height);
+  cands = cands.filter(function(v){ return v && v > 200; });
+  var vh = cands.length ? Math.min.apply(null, cands) : window.innerHeight;
+  root.style.setProperty('--vh', vh + 'px');             /* body 高度 = 最保守的可见高度 */
+
+  var cs = getComputedStyle(root);
   var sat = parseFloat(cs.getPropertyValue('--sat')) || 0;
   var sab = parseFloat(cs.getPropertyValue('--sab')) || 0;
-  var availH = window.innerHeight - sat - sab;
+  var availH = Math.max(320, vh - sat - sab) * 0.98;     /* 再留 2% 余量，不贴住工具栏 */
   var s = Math.min(window.innerWidth / 428, availH / 926);
-  document.documentElement.style.setProperty('--s', s.toFixed(5));
+  root.style.setProperty('--s', s.toFixed(5));
 }
 window.addEventListener('resize', fit);
-window.addEventListener('orientationchange', function(){ setTimeout(fit, 120); });
+window.addEventListener('orientationchange', function(){ setTimeout(fit, 150); });
+if (window.visualViewport) window.visualViewport.addEventListener('resize', fit);
 fit();
 
 /* ---------- 金色高亮：{...} → <em> ---------- */
@@ -371,9 +421,15 @@ $('similar').addEventListener('click', function(){
 $('home1').addEventListener('click', function(){ inputAsk.value = ''; show('ask'); });
 $('home2').addEventListener('click', function(){ show('ask'); });
 
-/* ---------- 键盘图标 = 聚焦输入 ---------- */
-$('kbd1').addEventListener('click', function(){ inputAsk.focus(); });
-$('kbd2').addEventListener('click', function(){ inputAnswer.focus(); });
+/* ---------- 轻提示 ---------- */
+var toastTimer = null;
+function toast(msg){
+  var el = $('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ el.classList.remove('show'); }, 2600);
+}
 
 /* ---------- 分享 ---------- */
 function share(){
@@ -387,28 +443,77 @@ function share(){
 $('share1').addEventListener('click', share);
 $('share2').addEventListener('click', share);
 
-/* ---------- 语音输入（不支持时退回键盘）---------- */
+/* ---------- 输入条：整条可点，右侧按钮空=键盘 / 有字=发送 ---------- */
 var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-function bindMic(micId, input){
-  var btn = $(micId), rec = null;
+
+function bindComposer(formId, actId, micId, input){
+  var form = $(formId), act = $(actId), mic = $(micId);
+
+  /* 有文字时右侧按钮变成发送箭头 */
+  function sync(){ form.classList.toggle('has-text', input.value.trim().length > 0); }
+  input.addEventListener('input', sync);
+  sync();
+
+  /* 键盘弹起/收起期间冻结缩放，避免页面跳动 */
+  input.addEventListener('focus', function(){ typing = true; });
+  input.addEventListener('blur', function(){
+    setTimeout(function(){ typing = false; fit(); }, 250);
+  });
+
+  /* 点胶囊任意位置都能开始输入（手写、拼音、英文都行） */
+  form.addEventListener('click', function(e){
+    if (act.contains(e.target) || mic.contains(e.target)) return;
+    if (e.target !== input) input.focus();
+  });
+
+  /* 右侧按钮：有文字 → 直接提交；没文字 → 叫出键盘 */
+  act.addEventListener('click', function(e){
+    e.preventDefault();
+    if (input.value.trim()){ input.blur(); go(input.value); }
+    else input.focus();
+  });
+
+  /* 语音输入（浏览器支持时启用，不支持则明确提示并切到键盘） */
+  var rec = null;
   if (SR){
     rec = new SR();
-    rec.lang = 'en-US'; rec.interimResults = false; rec.maxAlternatives = 1;
+    rec.lang = 'en-US';
+    rec.interimResults = false;
+    rec.maxAlternatives = 1;
     rec.onresult = function(e){
-      btn.classList.remove('listening');
-      go(e.results[0][0].transcript);
+      mic.classList.remove('listening');
+      var text = (e.results[0][0].transcript || '').trim();
+      if (text) go(text);
     };
-    rec.onerror = function(){ btn.classList.remove('listening'); };
-    rec.onend   = function(){ btn.classList.remove('listening'); };
+    rec.onerror = function(ev){
+      mic.classList.remove('listening');
+      if (ev && ev.error === 'not-allowed')
+        toast('Microphone access was denied — tap the field to type instead.');
+      else
+        toast('Did not catch that — tap the field to type instead.');
+    };
+    rec.onend = function(){ mic.classList.remove('listening'); };
   }
-  btn.addEventListener('click', function(){
-    if (!rec){ input.focus(); return; }
-    try { btn.classList.add('listening'); rec.start(); }
-    catch (e){ btn.classList.remove('listening'); input.focus(); }
+  mic.addEventListener('click', function(e){
+    e.preventDefault();
+    if (!rec){
+      toast('Voice input is not supported here — tap the field and type.');
+      input.focus();
+      return;
+    }
+    try {
+      mic.classList.add('listening');
+      rec.start();
+      toast('Listening… say your question.');
+    } catch (err) {
+      mic.classList.remove('listening');
+      input.focus();
+    }
   });
 }
-bindMic('mic1', inputAsk);
-bindMic('mic2', inputAnswer);
+
+bindComposer('composer1', 'act1', 'mic1', inputAsk);
+bindComposer('composer2', 'act2', 'mic2', inputAnswer);
 
 /* ---------- PWA ---------- */
 (function pwa(){
