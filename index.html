@@ -7,6 +7,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="占卜问答">
+<link rel="apple-touch-startup-image" href="assets/splash/440x956@3x.jpg" media="(device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3)">
+<link rel="apple-touch-startup-image" href="assets/splash/402x874@3x.jpg" media="(device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3)">
 <link rel="apple-touch-startup-image" href="assets/splash/430x932@3x.jpg" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)">
 <link rel="apple-touch-startup-image" href="assets/splash/393x852@3x.jpg" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)">
 <link rel="apple-touch-startup-image" href="assets/splash/390x844@3x.jpg" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)">
@@ -53,7 +55,7 @@ body{
   position:fixed;left:0;right:0;top:0;height:var(--vh,100%);
   overflow:hidden;
   display:grid;place-items:center;
-  padding:var(--sat) 0 var(--sab);
+  padding:0;                   /* 不再为安全区留边 —— 设计稿本身就是整屏画板 */
   -webkit-text-size-adjust:100%;
   touch-action:manipulation;              /* 禁掉双击缩放 */
   -webkit-user-select:none;user-select:none;
@@ -395,11 +397,11 @@ function fit(){
   var vh = cands.length ? Math.min.apply(null, cands) : window.innerHeight;
   root.style.setProperty('--vh', vh + 'px');             /* body 高度 = 最保守的可见高度 */
 
-  var cs = getComputedStyle(root);
-  var sat = parseFloat(cs.getPropertyValue('--sat')) || 0;
-  var sab = parseFloat(cs.getPropertyValue('--sab')) || 0;
-  var availH = Math.max(320, vh - sat - sab) * 0.98;     /* 再留 2% 余量，不贴住工具栏 */
-  var s = Math.min(window.innerWidth / 428, availH / 926);
+  /* 铺满屏幕：优先按宽度铺满，只有高度真不够时才按高度缩。
+     注意不要再减安全区 —— 设计稿 428×926 本身就是「含状态栏的整屏画板」，
+     顶部 48px 空白 + 底部 36px 空白已经把状态栏和 Home 指示条算进去了，
+     再减一次会让画面只剩 88% 宽，四周全是黑边。                        */
+  var s = Math.min(window.innerWidth / 428, vh / 926);
   root.style.setProperty('--s', s.toFixed(5));
 }
 window.addEventListener('resize', fit);
