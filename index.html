@@ -208,15 +208,42 @@ img{-webkit-user-drag:none;user-drag:none}
 /* 中文：宋体渲染，字号与行距单独调整 */
 #answer.zh{font-size:18.5px;line-height:1.82;letter-spacing:.01em}
 .question.zh{font-size:21px;line-height:1.5;letter-spacing:.03em}
+/* ---------- 抽答案动效 ----------
+   卡片绕竖轴转 3 整圈（1080°）→ 停住 → 答案文字浮现。
+   转的过程中答案是隐藏的，所以看不到字在转。
+   时序：--spin 时长 + --pause 停留，之后文字 --fade 淡入。            */
+:root{
+  --spin:1.5s;      /* 3 圈，每圈 0.5s */
+  --pause:.14s;     /* 转完停一下 */
+  --fade:.45s;      /* 文字淡入 */
+}
 #screen-answer.active .answer-card{
-  animation:cardIn .7s cubic-bezier(.2,.8,.25,1) both;
+  animation:cardSpin var(--spin) cubic-bezier(.25,.7,.25,1) both;
+  transform-style:preserve-3d;
+  will-change:transform;
 }
-@keyframes cardIn{
-  0%{opacity:0;transform:translateY(22px) scale(.94)}
-  100%{opacity:1;transform:translateY(0) scale(1)}
+@keyframes cardSpin{
+  0%{
+    opacity:0;
+    transform:perspective(1200px) rotateY(0deg) scale(.9);
+    box-shadow:0 0 0 rgba(227,225,219,0);
+  }
+  8%{ opacity:1; }
+  55%{ box-shadow:0 0 34px rgba(227,225,219,.42); }
+  100%{
+    opacity:1;
+    transform:perspective(1200px) rotateY(1080deg) scale(1);
+    box-shadow:0 0 0 rgba(227,225,219,0);
+  }
 }
-#screen-answer.active .answer-card p{animation:fadeUp .6s ease .28s both}
-@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+/* 文字等转完 + 停留之后才出现 */
+#screen-answer.active .answer-card p{
+  animation:fadeUp var(--fade) ease calc(var(--spin) + var(--pause)) both;
+}
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(10px)}
+  to{opacity:1;transform:none}
+}
 
 .btn-similar{
   position:absolute;left:79px;top:784px;width:270px;height:46px;
@@ -399,6 +426,17 @@ function setAnswer(text){
   el.innerHTML = renderAnswer(text);
 }
 
+/* 重播「转 3 圈 → 停住 → 答案浮现」动效 */
+function restartReveal(){
+  var card = screens.answer.querySelector('.answer-card');
+  var text = $('answer');
+  card.style.animation = 'none';
+  text.style.animation = 'none';
+  void card.offsetWidth;          /* 强制重排，否则动画不会重头播 */
+  card.style.animation = '';
+  text.style.animation = '';
+}
+
 /* ---------- 抽答案 ---------- */
 function draw(question){
   var q = (question || '').trim();
@@ -415,10 +453,7 @@ function draw(question){
 
   setAnswer(pickAnswer(currentTopic, currentLang));
 
-  var card = screens.answer.querySelector('.answer-card');
-  card.style.animation = 'none';
-  void card.offsetWidth;
-  card.style.animation = '';
+  restartReveal();
 }
 
 function show(name){
@@ -441,9 +476,8 @@ $('composer2').addEventListener('submit', function(e){ e.preventDefault(); go(in
 /* ---------- View similar case：再抽一张 ---------- */
 $('similar').addEventListener('click', function(){
   setAnswer(pickAnswer(currentTopic, currentLang));
-  var card = screens.answer.querySelector('.answer-card');
-  card.style.animation = 'none'; void card.offsetWidth; card.style.animation = '';
-  if (navigator.vibrate){ try { navigator.vibrate(10); } catch(e){} }
+  restartReveal();
+  if (navigator.vibrate){ try { navigator.vibrate(12); } catch(e){} }
 });
 
 /* ---------- 主页按钮 = 回到提问页 ---------- */

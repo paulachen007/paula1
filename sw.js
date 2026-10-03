@@ -1,7 +1,7 @@
 /* Ask Oracle · Service Worker
    把页面、字体和图片缓存到本地，断网也能打开。 */
 
-var CACHE = 'oracle-v4';
+var CACHE = 'oracle-v5';
 
 var ASSETS = [
   './',
